@@ -96,6 +96,9 @@ export default function AdminPage() {
   const [editingSource, setEditingSource] = useState<FeedSource | null>(null)
   const [editingYt, setEditingYt] = useState<YouTubeChannel | null>(null)
 
+  // YouTube test results, keyed by channel id
+  const [ytTestResults, setYtTestResults] = useState<Record<string, { state: 'running' | 'ok' | 'error'; message: string; preview?: { title: string; publishedAt: string }[] }>>({})
+
   // Source test results, keyed by source id
   const [testResults, setTestResults] = useState<Record<string, { state: 'running' | 'ok' | 'error'; message: string; preview?: { title: string; published: string }[] }>>({})
 
@@ -257,6 +260,24 @@ export default function AdminPage() {
   async function deleteYt(id: string) {
     await fetch(`/api/admin/youtube/${id}`, { method: 'DELETE' })
     loadData()
+  }
+
+  async function testYt(ch: YouTubeChannel) {
+    setYtTestResults((r) => ({ ...r, [ch.id]: { state: 'running', message: 'Testing…' } }))
+    const res = await fetch('/api/admin/test-youtube', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ channelId: ch.channel_id, name: ch.name }),
+    })
+    const data = await res.json()
+    setYtTestResults((r) => ({
+      ...r,
+      [ch.id]: {
+        state: data.ok ? 'ok' : 'error',
+        message: data.ok ? `${data.count} videos found` : data.message,
+        preview: data.preview,
+      },
+    }))
   }
 
   async function saveYt(e: React.FormEvent) {
@@ -636,13 +657,34 @@ export default function AdminPage() {
                     </div>
                   </form>
                 ) : (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px' }}>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontWeight: 500, fontSize: 14, margin: 0 }}>{ch.name}</p>
-                      <p style={{ fontSize: 12, color: 'var(--muted)', margin: '2px 0 0', fontFamily: 'monospace' }}>{ch.channel_id}</p>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px' }}>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontWeight: 500, fontSize: 14, margin: 0 }}>{ch.name}</p>
+                        <p style={{ fontSize: 12, color: 'var(--muted)', margin: '2px 0 0', fontFamily: 'monospace' }}>{ch.channel_id}</p>
+                      </div>
+                      <button
+                        onClick={() => testYt(ch)}
+                        disabled={ytTestResults[ch.id]?.state === 'running'}
+                        style={btn('ghost', { fontSize: 12 })}
+                      >
+                        {ytTestResults[ch.id]?.state === 'running' ? '…' : 'Test'}
+                      </button>
+                      <button onClick={() => setEditingYt(ch)} style={btn('ghost')}>Edit</button>
+                      <button onClick={() => deleteYt(ch.id)} style={btn('ghost', { color: '#c00' })}>Remove</button>
                     </div>
-                    <button onClick={() => setEditingYt(ch)} style={btn('ghost')}>Edit</button>
-                    <button onClick={() => deleteYt(ch.id)} style={btn('ghost', { color: '#c00' })}>Remove</button>
+                    {ytTestResults[ch.id] && ytTestResults[ch.id].state !== 'running' && (
+                      <div style={{ padding: '0 16px 12px' }}>
+                        <p style={{ fontSize: 12, color: ytTestResults[ch.id].state === 'ok' ? '#2a7a2a' : '#c00', margin: '0 0 4px' }}>
+                          {ytTestResults[ch.id].state === 'ok' ? '✓' : '✗'} {ytTestResults[ch.id].message}
+                        </p>
+                        {ytTestResults[ch.id].preview?.map((v, i) => (
+                          <p key={i} style={{ fontSize: 11, color: 'var(--muted)', margin: '2px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {relativeTime(v.publishedAt)} — {v.title}
+                          </p>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
