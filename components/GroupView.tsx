@@ -131,7 +131,7 @@ export default function GroupView({ groupName, groupId, digests, videos }: Props
           </p>
         )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           {listItems.map((entry, i) =>
             entry.kind === 'article' ? (
               <ArticleCard
