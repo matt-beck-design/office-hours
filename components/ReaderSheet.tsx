@@ -9,6 +9,11 @@ interface ReaderArticle {
   content: string
 }
 
+interface ReaderError {
+  error: string
+  status?: number
+}
+
 interface Props {
   url: string
   fallbackTitle: string
@@ -17,7 +22,7 @@ interface Props {
 
 export default function ReaderSheet({ url, fallbackTitle, onClose }: Props) {
   const [article, setArticle] = useState<ReaderArticle | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<ReaderError | null>(null)
 
   useEffect(() => {
     setArticle(null)
@@ -25,10 +30,10 @@ export default function ReaderSheet({ url, fallbackTitle, onClose }: Props) {
     fetch(`/api/reader?url=${encodeURIComponent(url)}`)
       .then((r) => r.json())
       .then((data) => {
-        if (data.error) setError(data.error)
+        if (data.error) setError({ error: data.error, status: data.status })
         else setArticle(data)
       })
-      .catch((e) => setError(e.message ?? 'Network error'))
+      .catch((e) => setError({ error: e.message ?? 'Network error' }))
   }, [url])
 
   // Close on escape
@@ -113,11 +118,12 @@ export default function ReaderSheet({ url, fallbackTitle, onClose }: Props) {
 
         {error && (
           <div style={{ paddingTop: '48px' }}>
-            <p style={{ color: 'var(--muted)', fontSize: '15px', marginBottom: '8px' }}>
-              Couldn't load article.
-            </p>
-            <p style={{ color: 'var(--border)', fontSize: '12px', marginBottom: '20px', fontFamily: 'monospace' }}>
-              {error}
+            <p style={{ color: 'var(--muted)', fontSize: '15px', marginBottom: '20px' }}>
+              {error.error === 'blocked'
+                ? 'This site requires a real browser — it blocks server-side readers.'
+                : error.error === 'parse_failed'
+                ? 'Article content couldn\'t be extracted from this page.'
+                : 'Couldn\'t load this article.'}
             </p>
             <a
               href={url}
