@@ -73,7 +73,7 @@ body {
 }
 
 .video-item {
-  padding: 12px 16px;
+  padding: 16px;
   border-radius: 12px;
   transition: background 0.15s ease;
 }
