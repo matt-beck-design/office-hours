@@ -92,6 +92,10 @@ export default function AdminPage() {
   const [showNewYt, setShowNewYt] = useState(false)
   const [newYt, setNewYt] = useState({ name: '', channelId: '' })
 
+  // Inline editing
+  const [editingSource, setEditingSource] = useState<FeedSource | null>(null)
+  const [editingYt, setEditingYt] = useState<YouTubeChannel | null>(null)
+
   // Source test results, keyed by source id
   const [testResults, setTestResults] = useState<Record<string, { state: 'running' | 'ok' | 'error'; message: string; preview?: { title: string; published: string }[] }>>({})
 
@@ -201,6 +205,23 @@ export default function AdminPage() {
     loadData()
   }
 
+  async function saveSource(e: React.FormEvent) {
+    e.preventDefault()
+    if (!editingSource) return
+    await fetch(`/api/admin/sources/${editingSource.id}`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        name: editingSource.name,
+        type: editingSource.type,
+        url: editingSource.type === 'rss' ? editingSource.url : null,
+        handle: editingSource.type === 'bluesky' ? editingSource.handle : null,
+      }),
+    })
+    setEditingSource(null)
+    loadData()
+  }
+
   async function testSource(src: FeedSource) {
     setTestResults((r) => ({ ...r, [src.id]: { state: 'running', message: 'Testing…' } }))
     const res = await fetch('/api/admin/test-source', {
@@ -235,6 +256,18 @@ export default function AdminPage() {
 
   async function deleteYt(id: string) {
     await fetch(`/api/admin/youtube/${id}`, { method: 'DELETE' })
+    loadData()
+  }
+
+  async function saveYt(e: React.FormEvent) {
+    e.preventDefault()
+    if (!editingYt) return
+    await fetch(`/api/admin/youtube/${editingYt.id}`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: editingYt.name, channel_id: editingYt.channel_id }),
+    })
+    setEditingYt(null)
     loadData()
   }
 
@@ -393,31 +426,81 @@ export default function AdminPage() {
                         )}
                         {tierSources.map((src) => {
                           const result = testResults[src.id]
+                          const isEditing = editingSource?.id === src.id
                           return (
                             <div key={src.id} style={{ borderBottom: '1px solid var(--border)', paddingBottom: 8, marginBottom: 2 }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0' }}>
-                                <span style={{ fontSize: 13, flex: '0 0 auto', fontWeight: 500 }}>{src.name}</span>
-                                <span style={{ fontSize: 11, color: 'var(--muted)', padding: '1px 5px', border: '1px solid var(--border)', borderRadius: 3, flex: '0 0 auto' }}>
-                                  {src.type}
-                                </span>
-                                <span style={{ fontSize: 12, color: 'var(--muted)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                  {src.type === 'rss' ? src.url : `@${src.handle}`}
-                                </span>
-                                <button
-                                  onClick={() => testSource(src)}
-                                  disabled={result?.state === 'running'}
-                                  style={btn('ghost', { fontSize: 12, padding: '2px 6px', minHeight: 24, flex: '0 0 auto', color: 'var(--muted)' })}
-                                >
-                                  {result?.state === 'running' ? '…' : 'Test'}
-                                </button>
-                                <button
-                                  onClick={() => deleteSource(src.id)}
-                                  style={btn('ghost', { color: '#c00', padding: '2px 6px', minHeight: 24, flex: '0 0 auto' })}
-                                >
-                                  ×
-                                </button>
-                              </div>
-                              {result && result.state !== 'running' && (
+                              {isEditing ? (
+                                <form onSubmit={saveSource} style={{ display: 'grid', gap: 8, padding: '8px 0' }}>
+                                  <input
+                                    value={editingSource.name}
+                                    onChange={(e) => setEditingSource((s) => s && ({ ...s, name: e.target.value }))}
+                                    placeholder="Name"
+                                    style={input}
+                                    required
+                                  />
+                                  <select
+                                    value={editingSource.type}
+                                    onChange={(e) => setEditingSource((s) => s && ({ ...s, type: e.target.value as 'rss' | 'bluesky' }))}
+                                    style={input}
+                                  >
+                                    <option value="rss">RSS</option>
+                                    <option value="bluesky">Bluesky</option>
+                                  </select>
+                                  {editingSource.type === 'rss' && (
+                                    <input
+                                      value={editingSource.url ?? ''}
+                                      onChange={(e) => setEditingSource((s) => s && ({ ...s, url: e.target.value }))}
+                                      placeholder="Feed URL"
+                                      style={input}
+                                      type="url"
+                                      required
+                                    />
+                                  )}
+                                  {editingSource.type === 'bluesky' && (
+                                    <input
+                                      value={editingSource.handle ?? ''}
+                                      onChange={(e) => setEditingSource((s) => s && ({ ...s, handle: e.target.value }))}
+                                      placeholder="Handle"
+                                      style={input}
+                                      required
+                                    />
+                                  )}
+                                  <div style={{ display: 'flex', gap: 8 }}>
+                                    <button type="submit" style={btn('primary')}>Save</button>
+                                    <button type="button" onClick={() => setEditingSource(null)} style={btn()}>Cancel</button>
+                                  </div>
+                                </form>
+                              ) : (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0' }}>
+                                  <span style={{ fontSize: 13, flex: '0 0 auto', fontWeight: 500 }}>{src.name}</span>
+                                  <span style={{ fontSize: 11, color: 'var(--muted)', padding: '1px 5px', border: '1px solid var(--border)', borderRadius: 3, flex: '0 0 auto' }}>
+                                    {src.type}
+                                  </span>
+                                  <span style={{ fontSize: 12, color: 'var(--muted)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                    {src.type === 'rss' ? src.url : `@${src.handle}`}
+                                  </span>
+                                  <button
+                                    onClick={() => { setEditingSource(src); setTestResults((r) => { const n = {...r}; delete n[src.id]; return n }) }}
+                                    style={btn('ghost', { fontSize: 12, padding: '2px 6px', minHeight: 24, flex: '0 0 auto' })}
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    onClick={() => testSource(src)}
+                                    disabled={result?.state === 'running'}
+                                    style={btn('ghost', { fontSize: 12, padding: '2px 6px', minHeight: 24, flex: '0 0 auto', color: 'var(--muted)' })}
+                                  >
+                                    {result?.state === 'running' ? '…' : 'Test'}
+                                  </button>
+                                  <button
+                                    onClick={() => deleteSource(src.id)}
+                                    style={btn('ghost', { color: '#c00', padding: '2px 6px', minHeight: 24, flex: '0 0 auto' })}
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              )}
+                              {!isEditing && result && result.state !== 'running' && (
                                 <div style={{ paddingLeft: 2 }}>
                                   <p style={{ fontSize: 12, color: result.state === 'ok' ? '#2a7a2a' : '#c00', margin: '2px 0 4px' }}>
                                     {result.state === 'ok' ? '✓' : '✗'} {result.message}
@@ -527,15 +610,41 @@ export default function AdminPage() {
               <p style={{ fontSize: 13, color: 'var(--muted)' }}>No YouTube channels yet.</p>
             )}
             {youtube.map((ch) => (
-              <div
-                key={ch.id}
-                style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', border: '1px solid var(--border)', borderRadius: 8 }}
-              >
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontWeight: 500, fontSize: 14, margin: 0 }}>{ch.name}</p>
-                  <p style={{ fontSize: 12, color: 'var(--muted)', margin: '2px 0 0', fontFamily: 'monospace' }}>{ch.channel_id}</p>
-                </div>
-                <button onClick={() => deleteYt(ch.id)} style={btn('ghost', { color: '#c00' })}>Remove</button>
+              <div key={ch.id} style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+                {editingYt?.id === ch.id ? (
+                  <form onSubmit={saveYt} style={{ padding: '14px 16px', display: 'grid', gap: 8 }}>
+                    <input
+                      value={editingYt.name}
+                      onChange={(e) => setEditingYt((y) => y && ({ ...y, name: e.target.value }))}
+                      placeholder="Channel name"
+                      style={input}
+                      required
+                    />
+                    <input
+                      value={editingYt.channel_id}
+                      onChange={(e) => setEditingYt((y) => y && ({ ...y, channel_id: e.target.value }))}
+                      placeholder="Channel ID (UC…)"
+                      style={input}
+                      required
+                    />
+                    <p style={{ fontSize: 11, color: 'var(--muted)', margin: 0 }}>
+                      Must start with UC — find it in the channel URL or right-click → View source → search &quot;channelId&quot;
+                    </p>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button type="submit" style={btn('primary')}>Save</button>
+                      <button type="button" onClick={() => setEditingYt(null)} style={btn()}>Cancel</button>
+                    </div>
+                  </form>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px' }}>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontWeight: 500, fontSize: 14, margin: 0 }}>{ch.name}</p>
+                      <p style={{ fontSize: 12, color: 'var(--muted)', margin: '2px 0 0', fontFamily: 'monospace' }}>{ch.channel_id}</p>
+                    </div>
+                    <button onClick={() => setEditingYt(ch)} style={btn('ghost')}>Edit</button>
+                    <button onClick={() => deleteYt(ch.id)} style={btn('ghost', { color: '#c00' })}>Remove</button>
+                  </div>
+                )}
               </div>
             ))}
 
