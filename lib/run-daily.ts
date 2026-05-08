@@ -61,7 +61,7 @@ export async function runDailyDigest(): Promise<{ date: string }> {
   // ── 3. Build Claude prompt ─────────────────────────────────────────────────
   const feedContext = allItems
     .map(({ group, topic, items }) => {
-      const itemLines = items.map((i) => `- [${i.source}] ${i.title}: ${i.summary}`).join('\n')
+      const itemLines = items.map((i) => `- [${i.source}] ${i.title}: ${i.summary} (url: ${i.url})`).join('\n')
       return `## ${group} (topic hint: ${topic})\n${itemLines}`
     })
     .join('\n\n')
@@ -102,6 +102,7 @@ Rules:
 - Skip: listicles, reviews, deals posts, YouTube thumbnail bait, anything that's just reacting to a tweet with no new information
 - If something is genuinely surprising or significant, it's okay to say so — one dry observation is fine, editorializing is not
 - Rumors and confirmed news should feel distinct — don't present speculation with the same weight as a press release
+- Each feed item includes a url — always use the exact provided url, never construct or guess one
 - Include items from the last 48 hours
 - Aim for 5-8 items per section — don't truncate if there's genuinely good material
 - Write summaries at 3-5 sentences — enough to give real context, not just a restatement of the headline
