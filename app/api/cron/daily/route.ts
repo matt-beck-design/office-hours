@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { runDailyDigest } from '@/lib/run-daily'
 
 export const runtime = 'nodejs'
-export const maxDuration = 60
+export const maxDuration = 300
 
 function authGuard(req: Request) {
   const auth = req.headers.get('authorization')

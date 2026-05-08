@@ -50,7 +50,7 @@ export async function runBreakingNews(): Promise<BreakingResult> {
 
   const client = new Anthropic()
   const response = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-6',
     max_tokens: 256,
     system: `You evaluate whether a set of news items contains genuine breaking news worth an immediate push notification.
 The user cares about: ${topicHints}.
