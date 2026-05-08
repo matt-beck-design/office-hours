@@ -103,9 +103,10 @@ Rules:
   })
 
   const rawText = response.content[0].type === 'text' ? response.content[0].text : ''
+  const cleaned = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()
   let digestContent: object
   try {
-    digestContent = JSON.parse(rawText)
+    digestContent = JSON.parse(cleaned)
   } catch {
     digestContent = { date: today, raw: rawText, sections: [] }
   }
