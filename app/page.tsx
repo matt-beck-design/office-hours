@@ -55,72 +55,124 @@ export default function Home() {
   const activeGroup = groups.find((g) => g.id === activeTab) ?? null
 
   return (
-    <div className="flex flex-col h-full" style={{ background: 'var(--background)' }}>
-      {/* Header */}
-      <header
-        className="flex items-center px-5 pt-[env(safe-area-inset-top)] pb-0"
-        style={{ borderBottom: '1px solid var(--border)' }}
+    <div className="flex h-full" style={{ background: 'var(--background)' }}>
+
+      {/* ── Sidebar (desktop) ───────────────────────────────────────────── */}
+      <aside
+        className="hidden md:flex flex-col flex-shrink-0"
+        style={{
+          width: 220,
+          borderRight: '1px solid var(--border)',
+          padding: '32px 24px',
+          position: 'sticky',
+          top: 0,
+          height: '100vh',
+          overflowY: 'auto',
+        }}
       >
-        <span className="text-sm font-medium py-4 tracking-wide" style={{ color: 'var(--muted)' }}>
+        <p
+          className="text-sm font-medium tracking-wide mb-8"
+          style={{ color: 'var(--muted)' }}
+        >
           Office Hours
-        </span>
-      </header>
+        </p>
+        <nav className="flex flex-col gap-1">
+          {groups.map((g) => (
+            <button
+              key={g.id}
+              onClick={() => setActiveTab(g.id)}
+              className="text-left text-sm py-1.5 px-2 rounded-md transition-colors"
+              style={{
+                background: activeTab === g.id ? 'var(--hover-bg)' : 'none',
+                color: activeTab === g.id ? 'var(--foreground)' : 'var(--muted)',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              {g.name}
+            </button>
+          ))}
+        </nav>
+      </aside>
 
-      {/* Tab bar */}
-      <nav className="flex gap-0 px-5 overflow-x-auto" style={{ borderBottom: '1px solid var(--border)', scrollbarWidth: 'none' }}>
-        {loading
-          ? null
-          : groups.map((g) => (
-              <button
-                key={g.id}
-                onClick={() => setActiveTab(g.id)}
-                className="py-3 px-1 mr-5 text-sm font-medium transition-colors flex-shrink-0"
-                style={{
-                  color: activeTab === g.id ? 'var(--foreground)' : 'var(--muted)',
-                  borderBottom: activeTab === g.id ? '2px solid var(--foreground)' : '2px solid transparent',
-                  marginBottom: '-1px',
-                  background: 'none',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {g.name}
-              </button>
-            ))}
-      </nav>
+      {/* ── Mobile tab bar ──────────────────────────────────────────────── */}
+      <div className="flex flex-col flex-1 min-w-0 md:hidden">
+        <header
+          className="flex items-center px-5 pt-[env(safe-area-inset-top)] pb-0 flex-shrink-0"
+          style={{ borderBottom: '1px solid var(--border)' }}
+        >
+          <span className="text-sm font-medium py-4 tracking-wide" style={{ color: 'var(--muted)' }}>
+            Office Hours
+          </span>
+        </header>
+        <nav
+          className="flex px-5 overflow-x-auto flex-shrink-0"
+          style={{ borderBottom: '1px solid var(--border)', scrollbarWidth: 'none' }}
+        >
+          {groups.map((g) => (
+            <button
+              key={g.id}
+              onClick={() => setActiveTab(g.id)}
+              className="py-3 px-1 mr-5 text-sm font-medium transition-colors flex-shrink-0"
+              style={{
+                color: activeTab === g.id ? 'var(--foreground)' : 'var(--muted)',
+                borderBottom: activeTab === g.id ? '2px solid var(--foreground)' : '2px solid transparent',
+                marginBottom: '-1px',
+                background: 'none',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {g.name}
+            </button>
+          ))}
+        </nav>
+        <main className="flex-1 overflow-y-auto">
+          {renderContent()}
+        </main>
+      </div>
 
-      {/* Content */}
-      <main className="flex-1 overflow-y-auto">
-        {loading && (
-          <div className="px-5 py-8 mx-auto" style={{ maxWidth: '576px' }}>
-            <div className="space-y-3">
-              {[...Array(6)].map((_, i) => (
-                <div
-                  key={i}
-                  className="h-4 rounded animate-pulse"
-                  style={{ background: 'var(--border)', width: `${60 + (i % 3) * 15}%` }}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-        {!loading && activeGroup && (
-          <GroupView
-            key={activeGroup.id}
-            groupId={activeGroup.id}
-            groupName={activeGroup.name}
-            digests={digests}
-            videos={videos}
-          />
-        )}
-        {!loading && !activeGroup && (
-          <div className="px-5 py-12 mx-auto text-center" style={{ maxWidth: '576px' }}>
-            <p className="text-sm" style={{ color: 'var(--muted)' }}>
-              No feed groups yet. Add them in admin.
-            </p>
-          </div>
-        )}
+      {/* ── Desktop main content ─────────────────────────────────────────── */}
+      <main className="hidden md:block flex-1 overflow-y-auto">
+        {renderContent()}
       </main>
+
     </div>
   )
+
+  function renderContent() {
+    if (loading) {
+      return (
+        <div className="px-5 py-8 mx-auto" style={{ maxWidth: '576px' }}>
+          <div className="space-y-3">
+            {[...Array(6)].map((_, i) => (
+              <div
+                key={i}
+                className="h-4 rounded animate-pulse"
+                style={{ background: 'var(--border)', width: `${60 + (i % 3) * 15}%` }}
+              />
+            ))}
+          </div>
+        </div>
+      )
+    }
+    if (activeGroup) {
+      return (
+        <GroupView
+          key={activeGroup.id}
+          groupId={activeGroup.id}
+          groupName={activeGroup.name}
+          digests={digests}
+          videos={videos}
+        />
+      )
+    }
+    return (
+      <div className="px-5 py-12 mx-auto text-center" style={{ maxWidth: '576px' }}>
+        <p className="text-sm" style={{ color: 'var(--muted)' }}>
+          No feed groups yet. Add them in admin.
+        </p>
+      </div>
+    )
+  }
 }
