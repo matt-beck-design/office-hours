@@ -1,36 +1,121 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Office Hours
 
-## Getting Started
+A personal news PWA. Consolidates RSS and Bluesky feeds into a daily AI digest, with a separate YouTube video feed. Lives on your iPhone home screen.
 
-First, run the development server:
+## Stack
+
+- Next.js 14 App Router + TypeScript
+- Tailwind CSS
+- Supabase (Postgres)
+- Anthropic Claude (`claude-sonnet-4-20250514`) for digest generation and breaking news filtering
+- Web Push (VAPID) for push notifications
+- Deployed on Vercel with two cron jobs
+
+---
+
+## Setup
+
+### 1. Supabase
+
+Create a project at [supabase.com](https://supabase.com), then run `supabase/schema.sql` in the SQL editor.
+
+### 2. Environment variables
+
+Copy `.env.example` to `.env.local` and fill in:
+
+| Variable | Where to find it |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Settings → API → Project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → Settings → API → anon public key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Settings → API → service_role secret key |
+| `ANTHROPIC_API_KEY` | [console.anthropic.com](https://console.anthropic.com) |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | See below |
+| `VAPID_PRIVATE_KEY` | See below |
+| `VAPID_EMAIL` | Any email (`mailto:you@example.com`) |
+| `CRON_SECRET` | Any long random string (e.g. `openssl rand -hex 32`) |
+
+**Generating VAPID keys:**
+```bash
+npx web-push generate-vapid-keys
+```
+Placeholder keys are pre-filled in `.env.local` — replace with real ones before deploying to production.
+
+### 3. Add your sources
+
+Edit `sources.config.js`. The shape is documented inline. Add YouTube channels like:
+```js
+youtube: [
+  { name: 'Channel Name', channelId: 'UCxxxxxxxxxxxxxxxxxxxxxxxx' },
+]
+```
+YouTube channel IDs can be found in the channel URL or via the YouTube Data API.
+
+### 4. Run locally
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 5. Test the crons manually
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Daily digest
+curl -X POST http://localhost:3000/api/cron/daily \
+  -H "Authorization: Bearer your_cron_secret"
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Breaking news check
+curl -X POST http://localhost:3000/api/cron/breaking \
+  -H "Authorization: Bearer your_cron_secret"
+```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy to Vercel
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Push to a GitHub repo
+2. Import to Vercel
+3. Add all env vars in Vercel → Settings → Environment Variables
+4. Deploy — cron jobs are configured in `vercel.json`:
+   - Daily digest: `0 15 * * *` (7am PT / 15:00 UTC)
+   - Breaking news: `0 * * * *` (every hour)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+> Vercel crons require a Pro plan or above for sub-hourly schedules. The hourly breaking news cron is within the free Hobby plan limit.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## PWA / Home Screen
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Open the deployed URL in Safari on iPhone
+2. Tap Share → Add to Home Screen
+3. Enable notifications when prompted
+
+Push notifications require the app to be installed to the home screen on iOS.
+
+---
+
+## File overview
+
+```
+sources.config.js        — all feed and YouTube channel config
+supabase/schema.sql      — database tables
+lib/
+  supabase.ts            — Supabase client (browser + admin)
+  push.ts                — Web Push helpers (server-only)
+  fetch-feeds.ts         — RSS + Bluesky + YouTube fetchers
+app/
+  page.tsx               — two-tab shell
+  api/cron/daily/        — daily digest cron
+  api/cron/breaking/     — hourly breaking news cron
+  api/digest/            — serve latest digest
+  api/videos/            — serve videos
+  api/push/              — subscribe/unsubscribe push
+components/
+  DigestView.tsx         — digest reader
+  VideosView.tsx         — video feed
+  PushManager.tsx        — notification subscribe button
+  ServiceWorkerRegistrar — registers sw.js
+public/
+  sw.js                  — service worker (offline + push)
+  manifest.json          — PWA manifest
+vercel.json              — cron schedules
+```
