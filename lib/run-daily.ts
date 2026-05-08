@@ -9,72 +9,70 @@ export async function runDailyDigest(): Promise<{ date: string }> {
   const today = new Date().toISOString().slice(0, 10)
   const db = supabaseAdmin()
 
-  // ── 1. Fetch all feeds ─────────────────────────────────────────────────────
-  const allItems: Array<{ group: string; topic: string; items: FeedItem[] }> = []
-
-  for (const group of sources.feeds) {
-    const groupItems: FeedItem[] = []
-    const allSources = [...group.breaking, ...group.daily]
-    await Promise.allSettled(
-      allSources.map(async (src) => {
-        const items =
-          src.type === 'rss'
-            ? await fetchRss(src.name, src.url!)
-            : await fetchBluesky(src.name, src.handle!)
-        groupItems.push(...items)
+  // ── 1. Fetch feeds, YouTube, and settings all in parallel ──────────────────
+  const [allItems, , bioRow, groupRows] = await Promise.all([
+    // Feed groups — all groups fetched in parallel
+    Promise.all(
+      sources.feeds.map(async (group) => {
+        const groupItems: FeedItem[] = []
+        await Promise.allSettled(
+          [...group.breaking, ...group.daily].map(async (src) => {
+            const items =
+              src.type === 'rss'
+                ? await fetchRss(src.name, src.url!)
+                : await fetchBluesky(src.name, src.handle!)
+            groupItems.push(...items)
+          }),
+        )
+        const seen = new Set<string>()
+        const deduped = groupItems
+          .filter((i) => { if (seen.has(i.id)) return false; seen.add(i.id); return true })
+          .sort((a, b) => new Date(b.published).getTime() - new Date(a.published).getTime())
+          .slice(0, 25)
+        return { group: group.name, topic: group.topic, items: deduped }
       }),
-    )
-    const seen = new Set<string>()
-    const deduped = groupItems
-      .filter((i) => {
-        if (seen.has(i.id)) return false
-        seen.add(i.id)
-        return true
-      })
-      .sort((a, b) => new Date(b.published).getTime() - new Date(a.published).getTime())
-      .slice(0, 60)
+    ),
 
-    allItems.push({ group: group.name, topic: group.topic, items: deduped })
-  }
+    // YouTube videos
+    (async () => {
+      if (sources.youtube.length === 0) return
+      const channelToGroup = new Map(sources.youtube.map((ch) => [ch.channelId, ch.groupId ?? null]))
+      const allVideos = (await Promise.all(
+        sources.youtube.map((ch) => fetchYouTubeChannel(ch.channelId, ch.name)),
+      )).flat()
+      if (allVideos.length > 0) {
+        await db.from('videos').upsert(
+          allVideos.map((v) => ({
+            channel_id: v.channelId,
+            channel_name: v.channelName,
+            title: v.title,
+            thumbnail_url: v.thumbnailUrl,
+            video_url: v.videoUrl,
+            published_at: v.publishedAt,
+            group_id: channelToGroup.get(v.channelId) ?? null,
+          })),
+          { onConflict: 'channel_id,video_url' },
+        )
+      }
+    })(),
 
-  // ── 2. Fetch YouTube videos ────────────────────────────────────────────────
-  if (sources.youtube.length > 0) {
-    const channelToGroup = new Map(sources.youtube.map((ch) => [ch.channelId, ch.groupId ?? null]))
-    const videoItems = await Promise.all(
-      sources.youtube.map((ch) => fetchYouTubeChannel(ch.channelId, ch.name)),
-    )
-    const allVideos = videoItems.flat()
-    if (allVideos.length > 0) {
-      await db.from('videos').upsert(
-        allVideos.map((v) => ({
-          channel_id: v.channelId,
-          channel_name: v.channelName,
-          title: v.title,
-          thumbnail_url: v.thumbnailUrl,
-          video_url: v.videoUrl,
-          published_at: v.publishedAt,
-          group_id: channelToGroup.get(v.channelId) ?? null,
-        })),
-        { onConflict: 'channel_id,video_url' },
-      )
-    }
-  }
+    // User bio
+    db.from('settings').select('value').eq('key', 'user_bio').single().then((r) => r.data),
 
-  // ── 3. Fetch user bio and group contexts ───────────────────────────────────
-  const { data: bioRow } = await db.from('settings').select('value').eq('key', 'user_bio').single()
+    // Group contexts
+    db.from('feed_groups').select('name, context').then((r) => r.data),
+  ])
+
+  // ── 2. Build Claude prompt ─────────────────────────────────────────────────
   const userBio = bioRow?.value ?? ''
-
-  const { data: groupRows } = await db.from('feed_groups').select('name, context')
   const groupContextMap = new Map((groupRows ?? []).map((g) => [g.name, g.context as string | null]))
-
-  // ── 4. Build Claude prompt ─────────────────────────────────────────────────
   const groupNames = allItems.map(({ group }) => group)
 
   const feedContext = allItems
     .map(({ group, topic, items }) => {
       const context = groupContextMap.get(group)
       const meta = [topic && `topic: ${topic}`, context && `context: ${context}`].filter(Boolean).join(' | ')
-      const itemLines = items.map((i) => `- [${i.source}] ${i.title}: ${i.summary} (url: ${i.url})`).join('\n')
+      const itemLines = items.map((i) => `- [${i.source}] ${i.title}: ${i.summary.slice(0, 200)} (url: ${i.url})`).join('\n')
       return `## ${group}${meta ? ` (${meta})` : ''}\n${itemLines}`
     })
     .join('\n\n')
