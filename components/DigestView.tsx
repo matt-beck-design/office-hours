@@ -84,9 +84,9 @@ export default function DigestView() {
 
       <div className="prose-digest">
         {sections.map((section, si) => (
-          <section key={si}>
+          <section key={si} style={{ marginBottom: '2.5rem' }}>
             <h2>{section.heading}</h2>
-            <div className="space-y-5">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
               {section.items.map((item, ii) => (
                 <div key={ii}>
                   {item.url ? (
@@ -96,22 +96,22 @@ export default function DigestView() {
                       rel="noopener noreferrer"
                       className="block"
                     >
-                      <p className="font-medium text-sm leading-snug mb-1">{item.title}</p>
-                      <p className="text-sm leading-relaxed" style={{ color: 'var(--muted)' }}>
+                      <p className="font-medium leading-snug" style={{ marginBottom: '0.35rem', fontFamily: 'inherit' }}>{item.title}</p>
+                      <p className="leading-relaxed" style={{ color: 'var(--muted)', margin: 0 }}>
                         {item.summary}
                       </p>
                       {item.source && (
-                        <p className="text-xs mt-1" style={{ color: 'var(--muted)', opacity: 0.6 }}>{item.source}</p>
+                        <p style={{ fontSize: '0.7rem', marginTop: '0.4rem', color: 'var(--muted)', opacity: 0.6, fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif', letterSpacing: '0.03em' }}>{item.source}</p>
                       )}
                     </a>
                   ) : (
                     <div>
-                      <p className="font-medium text-sm leading-snug mb-1">{item.title}</p>
-                      <p className="text-sm leading-relaxed" style={{ color: 'var(--muted)' }}>
+                      <p className="font-medium leading-snug" style={{ marginBottom: '0.35rem', fontFamily: 'inherit' }}>{item.title}</p>
+                      <p className="leading-relaxed" style={{ color: 'var(--muted)', margin: 0 }}>
                         {item.summary}
                       </p>
                       {item.source && (
-                        <p className="text-xs mt-1" style={{ color: 'var(--muted)', opacity: 0.6 }}>{item.source}</p>
+                        <p style={{ fontSize: '0.7rem', marginTop: '0.4rem', color: 'var(--muted)', opacity: 0.6, fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif', letterSpacing: '0.03em' }}>{item.source}</p>
                       )}
                     </div>
                   )}

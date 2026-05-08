@@ -7,6 +7,7 @@
   --border: #e5e2dc;
   --tab-bg: #f0ede8;
   --accent: #1a1a1a;
+  --font-serif: Georgia, 'Times New Roman', serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -46,35 +47,30 @@ body {
 
 /* Digest prose */
 .prose-digest {
+  font-family: var(--font-serif);
   font-size: 1rem;
   line-height: 1.75;
   color: var(--foreground);
 }
 
 .prose-digest h2 {
-  font-size: 0.75rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 0.7rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--muted);
-  margin: 2rem 0 0.75rem;
-  padding-top: 1.5rem;
+  margin: 0 0 1.5rem;
+  padding-top: 2rem;
   border-top: 1px solid var(--border);
 }
 
 .prose-digest h2:first-child {
-  margin-top: 0;
   padding-top: 0;
   border-top: none;
 }
 
 .prose-digest a {
   color: inherit;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-color: var(--border);
-}
-
-.prose-digest a:hover {
-  text-decoration-color: var(--muted);
+  text-decoration: none;
 }
