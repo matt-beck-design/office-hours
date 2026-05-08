@@ -84,6 +84,15 @@ export default function AdminPage() {
   const [showNewGroup, setShowNewGroup] = useState(false)
   const [newGroup, setNewGroup] = useState({ name: '', topic: '' })
   const [editingGroup, setEditingGroup] = useState<{ id: string; name: string; topic: string } | null>(null)
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set())
+
+  function toggleCollapse(id: string) {
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
 
   // Source forms — one open at a time, keyed by `${groupId}:${tier}`
   const [addSourceKey, setAddSourceKey] = useState<string | null>(null)
@@ -405,12 +414,20 @@ export default function AdminPage() {
                     </div>
                   </form>
                 ) : (
-                  <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, background: 'var(--tab-bg)' }}>
-                    <div>
-                      <p style={{ fontWeight: 600, fontSize: 14, margin: 0 }}>{group.name}</p>
-                      <p style={{ fontSize: 12, color: 'var(--muted)', margin: '2px 0 0' }}>{group.topic}</p>
+                  <div
+                    onClick={() => toggleCollapse(group.id)}
+                    style={{ padding: '14px 16px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, background: 'var(--tab-bg)', cursor: 'pointer', userSelect: 'none' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
+                      <span style={{ fontSize: 11, color: 'var(--muted)', flexShrink: 0 }}>
+                        {collapsedGroups.has(group.id) ? '▶' : '▼'}
+                      </span>
+                      <div>
+                        <p style={{ fontWeight: 600, fontSize: 14, margin: 0 }}>{group.name}</p>
+                        <p style={{ fontSize: 12, color: 'var(--muted)', margin: '2px 0 0' }}>{group.topic}</p>
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                    <div style={{ display: 'flex', gap: 6, flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => setEditingGroup({ id: group.id, name: group.name, topic: group.topic })}
                         style={btn('ghost')}
@@ -423,7 +440,7 @@ export default function AdminPage() {
                 )}
 
                 {/* Sources by tier */}
-                <div style={{ padding: '12px 16px', display: 'grid', gap: 16 }}>
+                {!collapsedGroups.has(group.id) && <div style={{ padding: '12px 16px', display: 'grid', gap: 16 }}>
                   {(['breaking', 'daily'] as const).map((tier) => {
                     const tierSources = group.feed_sources.filter((s) => s.tier === tier)
                     const key = `${group.id}:${tier}`
@@ -587,7 +604,7 @@ export default function AdminPage() {
                       </div>
                     )
                   })}
-                </div>
+                </div>}
               </div>
             ))}
 
