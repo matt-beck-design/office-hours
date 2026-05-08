@@ -96,7 +96,7 @@ export default function GroupView({ groupName, groupId, digests, videos }: Props
       <div className="px-5 py-6 mx-auto pb-[env(safe-area-inset-bottom)]" style={{ maxWidth: '576px' }}>
         {/* Date nav — only show if there are digests */}
         {digests.length > 0 && (
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-6" style={{ padding: '0 16px' }}>
             <button
               onClick={() => setIndex((i) => i + 1)}
               disabled={!hasPrev}
@@ -168,19 +168,19 @@ function VideoCard({ video }: { video: Video }) {
       href={video.video_url}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex gap-3 video-item"
+      className="flex gap-4 video-item"
     >
       {video.thumbnail_url && (
-        <div className="flex-shrink-0 rounded-sm overflow-hidden relative" style={{ width: 128, height: 72 }}>
-          <Image src={video.thumbnail_url} alt={video.title} fill sizes="128px" className="object-cover" />
+        <div className="flex-shrink-0 rounded-sm overflow-hidden relative" style={{ width: 160, height: 90 }}>
+          <Image src={video.thumbnail_url} alt={video.title} fill sizes="160px" className="object-cover" />
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium leading-snug line-clamp-2" style={{ color: 'var(--foreground)' }}>
+        <p className="font-medium leading-snug line-clamp-2" style={{ fontSize: '16px', color: 'var(--foreground)', marginBottom: '0.35rem' }}>
           {video.title}
         </p>
-        <p className="text-xs mt-1" style={{ color: 'var(--muted)' }}>{video.channel_name}</p>
-        <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>{relativeDate(video.published_at)}</p>
+        <p style={{ fontSize: '13px', color: 'var(--muted)', margin: 0 }}>{video.channel_name}</p>
+        <p style={{ fontSize: '13px', color: 'var(--muted)', marginTop: '2px' }}>{relativeDate(video.published_at)}</p>
       </div>
     </a>
   )

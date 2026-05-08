@@ -55,33 +55,31 @@ export default function Home() {
   const activeGroup = groups.find((g) => g.id === activeTab) ?? null
 
   return (
-    <div className="flex h-full" style={{ background: 'var(--background)' }}>
+    <div className="h-full" style={{ background: 'var(--background)' }}>
 
-      {/* ── Sidebar (desktop) ───────────────────────────────────────────── */}
+      {/* ── Sidebar (desktop, fixed) ─────────────────────────────────────── */}
       <aside
-        className="hidden md:flex flex-col flex-shrink-0"
+        className="hidden md:flex flex-col"
         style={{
-          width: 220,
-          borderRight: '1px solid var(--border)',
-          padding: '32px 24px',
-          position: 'sticky',
+          position: 'fixed',
           top: 0,
+          left: 0,
+          width: 200,
           height: '100vh',
+          padding: '28px 12px',
           overflowY: 'auto',
+          zIndex: 10,
         }}
       >
-        <p
-          className="text-sm font-medium tracking-wide mb-8"
-          style={{ color: 'var(--muted)' }}
-        >
+        <p className="text-sm font-medium tracking-wide mb-6 px-2" style={{ color: 'var(--muted)' }}>
           Office Hours
         </p>
-        <nav className="flex flex-col gap-1">
+        <nav className="flex flex-col gap-0.5">
           {groups.map((g) => (
             <button
               key={g.id}
               onClick={() => setActiveTab(g.id)}
-              className="text-left text-sm py-1.5 px-2 rounded-md transition-colors"
+              className="text-left text-sm py-2 px-3 rounded-md transition-colors"
               style={{
                 background: activeTab === g.id ? 'var(--hover-bg)' : 'none',
                 color: activeTab === g.id ? 'var(--foreground)' : 'var(--muted)',
@@ -95,8 +93,8 @@ export default function Home() {
         </nav>
       </aside>
 
-      {/* ── Mobile tab bar ──────────────────────────────────────────────── */}
-      <div className="flex flex-col flex-1 min-w-0 md:hidden">
+      {/* ── Mobile layout ───────────────────────────────────────────────── */}
+      <div className="flex flex-col h-full md:hidden">
         <header
           className="flex items-center px-5 pt-[env(safe-area-inset-top)] pb-0 flex-shrink-0"
           style={{ borderBottom: '1px solid var(--border)' }}
@@ -127,13 +125,11 @@ export default function Home() {
             </button>
           ))}
         </nav>
-        <main className="flex-1 overflow-y-auto">
-          {renderContent()}
-        </main>
+        <main className="flex-1 overflow-y-auto">{renderContent()}</main>
       </div>
 
-      {/* ── Desktop main content ─────────────────────────────────────────── */}
-      <main className="hidden md:block flex-1 overflow-y-auto">
+      {/* ── Desktop main (full viewport width, centered) ─────────────────── */}
+      <main className="hidden md:block h-full overflow-y-auto">
         {renderContent()}
       </main>
 
