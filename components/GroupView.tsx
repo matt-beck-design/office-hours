@@ -47,18 +47,7 @@ export default function GroupView({ groupName, groupId, digests, videos }: Props
   const [index, setIndex] = useState(0)
   const [reader, setReader] = useState<{ url: string; title: string } | null>(null)
 
-  // Show videos published within the 48h window ending at the selected digest date
-  const digestEndMs = digest
-    ? new Date(digest.date + 'T23:59:59').getTime()
-    : Date.now()
-  const windowMs = 48 * 60 * 60 * 1000
-  const groupVideos = videos.filter((v) => {
-    if (v.group_id !== groupId) return false
-    const published = new Date(v.published_at).getTime()
-    return published >= digestEndMs - windowMs && published <= digestEndMs
-  })
-
-  if (digests.length === 0 && groupVideos.length === 0) {
+  if (digests.length === 0) {
     return (
       <div className="px-5 py-12 mx-auto text-center" style={{ maxWidth: '576px' }}>
         <p className="text-sm" style={{ color: 'var(--muted)' }}>
@@ -76,6 +65,17 @@ export default function GroupView({ groupName, groupId, digests, videos }: Props
     (s) => s.heading.toLowerCase() === groupName.toLowerCase(),
   )
   const articles: DigestItem[] = section?.items ?? []
+
+  // Show videos published within the 48h window ending at the selected digest date
+  const digestEndMs = digest
+    ? new Date(digest.date + 'T23:59:59').getTime()
+    : Date.now()
+  const windowMs = 48 * 60 * 60 * 1000
+  const groupVideos = videos.filter((v) => {
+    if (v.group_id !== groupId) return false
+    const published = new Date(v.published_at).getTime()
+    return published >= digestEndMs - windowMs && published <= digestEndMs
+  })
 
   // Merge: articles first, then videos (no time sort needed)
   const listItems: ListItem[] = [
