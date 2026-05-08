@@ -72,7 +72,7 @@ export async function runDailyDigest(): Promise<{ date: string }> {
     .map(({ group, topic, items }) => {
       const context = groupContextMap.get(group)
       const meta = [topic && `topic: ${topic}`, context && `context: ${context}`].filter(Boolean).join(' | ')
-      const itemLines = items.map((i) => `- [${i.source}] ${i.title}: ${i.summary.slice(0, 200)} (url: ${i.url})`).join('\n')
+      const itemLines = items.map((i) => `- [${i.source}] ${i.title}: ${i.summary.slice(0, 200)} (published: ${i.published.slice(0, 10)}, url: ${i.url})`).join('\n')
       return `## ${group}${meta ? ` (${meta})` : ''}\n${itemLines}`
     })
     .join('\n\n')
@@ -110,7 +110,7 @@ Rules:
 - Skip: listicles, reviews, deals posts, YouTube thumbnail bait, anything that's just reacting to a tweet with no new information
 - Rumors and confirmed news should feel distinct — don't present speculation with the same weight as a press release
 - Each feed item includes a url — always use the exact provided url, never construct or guess one
-- Include items from the last 48 hours
+- Items are pre-sorted by recency — include anything relevant, prioritise the most recent
 - Aim for 5-8 items per section — don't truncate if there's genuinely good material
 - Write summaries at 3-5 sentences — enough to give real context, not just a restatement of the headline
 - Return valid JSON only, no markdown fences`,
