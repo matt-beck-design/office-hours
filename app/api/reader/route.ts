@@ -19,9 +19,7 @@ export async function GET(request: NextRequest) {
 
     const html = await res.text()
     const { document } = parseHTML(html)
-    // Readability mutates the document — pass the URL so relative links resolve
-    ;(document as unknown as Document).baseURI
-    const article = new Readability(document as unknown as Document, { url }).parse()
+    const article = new Readability(document as unknown as Document).parse()
 
     if (!article) return Response.json({ error: 'Could not parse article' }, { status: 422 })
 
