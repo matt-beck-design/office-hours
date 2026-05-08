@@ -32,7 +32,7 @@ export async function runDailyDigest(): Promise<{ date: string }> {
         return true
       })
       .sort((a, b) => new Date(b.published).getTime() - new Date(a.published).getTime())
-      .slice(0, 40)
+      .slice(0, 60)
 
     allItems.push({ group: group.name, topic: group.topic, items: deduped })
   }
@@ -102,7 +102,9 @@ Rules:
 - Skip: listicles, reviews, deals posts, YouTube thumbnail bait, anything that's just reacting to a tweet with no new information
 - If something is genuinely surprising or significant, it's okay to say so — one dry observation is fine, editorializing is not
 - Rumors and confirmed news should feel distinct — don't present speculation with the same weight as a press release
-- Only include items from the last 24 hours
+- Include items from the last 48 hours
+- Aim for 5-8 items per section — don't truncate if there's genuinely good material
+- Write summaries at 3-5 sentences — enough to give real context, not just a restatement of the headline
 - Return valid JSON only, no markdown fences`,
     messages: [
       { role: 'user', content: `Today is ${today}. Here are the feed items:\n\n${feedContext}` },
