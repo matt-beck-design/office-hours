@@ -95,7 +95,7 @@ Return a JSON object with this shape:
   "sections": [
     {
       "heading": "string",
-      "note": "string — 1-3 sentences in a direct, personal voice. Give the reader a topline read of what's happening in this group today and what it means for them specifically, informed by their bio and any group context provided. Write it like a message to a friend: casual, direct, no throat-clearing. Use an empty string if nothing notable happened.",
+      "note": "string — Write this like a trusted personal assistant delivering a morning briefing. Warm, direct, uses the reader's name if you know it from the bio. Lead with what actually matters today and why it's worth their attention. Something like: 'Morning Matt — the Microsoft story you've been watching finally has a resolution, and there's one other thing worth your time.' Or if it's a quiet day: 'Not a lot happening here today, but there's one thing worth a look.' 2-4 sentences max. Never sound like a newsletter intro or a press release — sound like a person.",
       "items": [
         { "title": "string", "summary": "string", "url": "string", "source": "string" }
       ]

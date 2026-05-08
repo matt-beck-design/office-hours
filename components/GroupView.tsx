@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import ReaderSheet from './ReaderSheet'
+import AssistantNote from './AssistantNote'
 
 interface DigestItem {
   title: string
@@ -94,7 +95,7 @@ export default function GroupView({ groupName, groupId, digests, videos }: Props
         />
       )}
 
-      <div className="mx-auto pb-[env(safe-area-inset-bottom)]" style={{ maxWidth: '576px' }}>
+      <div className="mx-auto pb-[env(safe-area-inset-bottom)]" style={{ maxWidth: '576px', paddingTop: '24px' }}>
         {/* Date nav — only show if there are digests */}
         {digests.length > 0 && (
           <div className="flex items-center justify-between mb-6" style={{ padding: '0 16px' }}>
@@ -109,9 +110,6 @@ export default function GroupView({ groupName, groupId, digests, videos }: Props
               }}
               aria-label="Previous day"
             >←</button>
-            <p className="text-xs" style={{ color: 'var(--muted)' }}>
-              {digest ? formatDate(digest.date) : '—'}
-            </p>
             <button
               onClick={() => setIndex((i) => i - 1)}
               disabled={!hasNext}
@@ -126,11 +124,11 @@ export default function GroupView({ groupName, groupId, digests, videos }: Props
           </div>
         )}
 
-        {section?.note && (
-          <p style={{ padding: '0 16px', marginBottom: '0.5rem', fontSize: '15px', lineHeight: '24px', color: 'var(--muted)' }}>
-            {section.note}
-          </p>
-        )}
+        <AssistantNote
+          note={section?.note}
+          groupName={groupName}
+          date={digest ? formatDate(digest.date) : ''}
+        />
 
         {listItems.length === 0 && (
           <p className="text-sm" style={{ color: 'var(--muted)', padding: '0 16px' }}>
