@@ -6,6 +6,7 @@ interface DigestItem {
   title: string
   summary: string
   url: string
+  source?: string
 }
 
 interface DigestSection {
@@ -99,6 +100,9 @@ export default function DigestView() {
                       <p className="text-sm leading-relaxed" style={{ color: 'var(--muted)' }}>
                         {item.summary}
                       </p>
+                      {item.source && (
+                        <p className="text-xs mt-1" style={{ color: 'var(--muted)', opacity: 0.6 }}>{item.source}</p>
+                      )}
                     </a>
                   ) : (
                     <div>
@@ -106,6 +110,9 @@ export default function DigestView() {
                       <p className="text-sm leading-relaxed" style={{ color: 'var(--muted)' }}>
                         {item.summary}
                       </p>
+                      {item.source && (
+                        <p className="text-xs mt-1" style={{ color: 'var(--muted)', opacity: 0.6 }}>{item.source}</p>
+                      )}
                     </div>
                   )}
                 </div>
