@@ -63,7 +63,7 @@ body {
 }
 
 .digest-item {
-  padding: 24px;
+  padding: 16px;
   border-radius: 12px;
   transition: background 0.15s ease;
 }
@@ -73,13 +73,20 @@ body {
 }
 
 .video-item {
-  padding: 24px;
+  padding: 16px;
   border-radius: 12px;
   transition: background 0.15s ease;
 }
 
 .video-item:hover {
   background: var(--hover-bg);
+}
+
+@media (min-width: 640px) {
+  .digest-item,
+  .video-item {
+    padding: 24px;
+  }
 }
 
 /* In-app reader */
