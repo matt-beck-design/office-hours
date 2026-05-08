@@ -81,7 +81,7 @@ export async function runDailyDigest(): Promise<{ date: string }> {
 
   const client = new Anthropic()
   const response = await client.messages.create({
-    model: 'claude-sonnet-4-6',
+    model: 'claude-haiku-4-5-20251001',
     max_tokens: 4096,
     system: `You are writing a daily news digest for a single reader.
 
