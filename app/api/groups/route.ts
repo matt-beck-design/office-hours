@@ -4,9 +4,8 @@ import { supabaseAdmin } from '@/lib/supabase'
 export async function GET() {
   const db = supabaseAdmin()
   const { data } = await db
-    .from('videos')
-    .select('*')
-    .order('published_at', { ascending: false })
-    .limit(200)
-  return NextResponse.json({ videos: data ?? [] })
+    .from('feed_groups')
+    .select('id, name')
+    .order('position', { ascending: true })
+  return NextResponse.json({ groups: data ?? [] })
 }

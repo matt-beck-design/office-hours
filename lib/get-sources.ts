@@ -17,7 +17,7 @@ export interface FeedGroupConfig {
 
 export interface SourcesConfig {
   feeds: FeedGroupConfig[]
-  youtube: { name: string; channelId: string }[]
+  youtube: { name: string; channelId: string; groupId?: string }[]
 }
 
 export async function getSources(): Promise<SourcesConfig> {
@@ -61,6 +61,7 @@ export async function getSources(): Promise<SourcesConfig> {
     const youtube = (ytChannels ?? []).map((c) => ({
       name: c.name,
       channelId: c.channel_id,
+      groupId: c.group_id ?? undefined,
     }))
 
     return { feeds, youtube }

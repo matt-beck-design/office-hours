@@ -10,7 +10,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const db = supabaseAdmin()
   const { data, error } = await db
     .from('youtube_channels')
-    .update({ name: body.name, channel_id: body.channel_id })
+    .update({ name: body.name, channel_id: body.channel_id, group_id: body.group_id || null })
     .eq('id', id)
     .select()
     .single()

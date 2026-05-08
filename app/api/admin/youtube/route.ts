@@ -13,11 +13,11 @@ export async function GET() {
 export async function POST(req: Request) {
   const guard = await checkAdminAuth()
   if (guard) return guard
-  const { name, channel_id } = await req.json()
+  const { name, channel_id, group_id } = await req.json()
   const db = supabaseAdmin()
   const { data, error } = await db
     .from('youtube_channels')
-    .insert({ name, channel_id })
+    .insert({ name, channel_id, group_id: group_id || null })
     .select()
     .single()
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })

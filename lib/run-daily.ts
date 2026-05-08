@@ -39,6 +39,7 @@ export async function runDailyDigest(): Promise<{ date: string }> {
 
   // ── 2. Fetch YouTube videos ────────────────────────────────────────────────
   if (sources.youtube.length > 0) {
+    const channelToGroup = new Map(sources.youtube.map((ch) => [ch.channelId, ch.groupId ?? null]))
     const videoItems = await Promise.all(
       sources.youtube.map((ch) => fetchYouTubeChannel(ch.channelId, ch.name)),
     )
@@ -52,6 +53,7 @@ export async function runDailyDigest(): Promise<{ date: string }> {
           thumbnail_url: v.thumbnailUrl,
           video_url: v.videoUrl,
           published_at: v.publishedAt,
+          group_id: channelToGroup.get(v.channelId) ?? null,
         })),
         { onConflict: 'channel_id,video_url' },
       )
@@ -59,6 +61,8 @@ export async function runDailyDigest(): Promise<{ date: string }> {
   }
 
   // ── 3. Build Claude prompt ─────────────────────────────────────────────────
+  const groupNames = allItems.map(({ group }) => group)
+
   const feedContext = allItems
     .map(({ group, topic, items }) => {
       const itemLines = items.map((i) => `- [${i.source}] ${i.title}: ${i.summary} (url: ${i.url})`).join('\n')
@@ -95,7 +99,7 @@ Content preferences:
 - Deprioritize or skip: sports games, mobile games, free-to-play live service updates (unless dramatic), esports, battle royale, anything that's purely a multiplayer-as-a-service story with no broader significance
 
 Rules:
-- Infer category headings from the actual content — don't force a taxonomy, let the day's news suggest its own shape
+- Use the exact feed group names provided as section headings — do not invent or rename them
 - Combine related stories across sources into one item — if five outlets covered the same announcement, that's one entry, not five
 - Write summaries the way a thoughtful person would explain something to a friend: direct, a little dry, no throat-clearing. "Microsoft quietly shelved the project" not "In a surprising move that has sent shockwaves through the gaming community"
 - Flag the signal-to-noise ratio honestly — if a rumor comes from a reliable insider, say so. If it's thin, say it's thin
@@ -108,7 +112,7 @@ Rules:
 - Write summaries at 3-5 sentences — enough to give real context, not just a restatement of the headline
 - Return valid JSON only, no markdown fences`,
     messages: [
-      { role: 'user', content: `Today is ${today}. Here are the feed items:\n\n${feedContext}` },
+      { role: 'user', content: `Today is ${today}. Feed group names (use these EXACTLY as section headings): ${groupNames.join(', ')}.\n\nHere are the feed items:\n\n${feedContext}` },
     ],
   })
 

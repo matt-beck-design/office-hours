@@ -27,6 +27,7 @@ interface YouTubeChannel {
   id: string
   name: string
   channel_id: string
+  group_id?: string
   enabled: boolean
 }
 
@@ -90,7 +91,7 @@ export default function AdminPage() {
 
   // YouTube form
   const [showNewYt, setShowNewYt] = useState(false)
-  const [newYt, setNewYt] = useState({ name: '', channelId: '' })
+  const [newYt, setNewYt] = useState({ name: '', channelId: '', groupId: '' })
 
   // Inline editing
   const [editingSource, setEditingSource] = useState<FeedSource | null>(null)
@@ -250,9 +251,9 @@ export default function AdminPage() {
     await fetch('/api/admin/youtube', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ name: newYt.name, channel_id: newYt.channelId }),
+      body: JSON.stringify({ name: newYt.name, channel_id: newYt.channelId, group_id: newYt.groupId || null }),
     })
-    setNewYt({ name: '', channelId: '' })
+    setNewYt({ name: '', channelId: '', groupId: '' })
     setShowNewYt(false)
     loadData()
   }
@@ -286,7 +287,7 @@ export default function AdminPage() {
     await fetch(`/api/admin/youtube/${editingYt.id}`, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ name: editingYt.name, channel_id: editingYt.channel_id }),
+      body: JSON.stringify({ name: editingYt.name, channel_id: editingYt.channel_id, group_id: editingYt.group_id || null }),
     })
     setEditingYt(null)
     loadData()
@@ -648,6 +649,14 @@ export default function AdminPage() {
                       style={input}
                       required
                     />
+                    <select
+                      value={editingYt.group_id ?? ''}
+                      onChange={(e) => setEditingYt((y) => y && ({ ...y, group_id: e.target.value || undefined }))}
+                      style={input}
+                    >
+                      <option value="">No group</option>
+                      {groups.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+                    </select>
                     <p style={{ fontSize: 11, color: 'var(--muted)', margin: 0 }}>
                       Must start with UC — find it in the channel URL or right-click → View source → search &quot;channelId&quot;
                     </p>
@@ -662,6 +671,11 @@ export default function AdminPage() {
                       <div style={{ flex: 1 }}>
                         <p style={{ fontWeight: 500, fontSize: 14, margin: 0 }}>{ch.name}</p>
                         <p style={{ fontSize: 12, color: 'var(--muted)', margin: '2px 0 0', fontFamily: 'monospace' }}>{ch.channel_id}</p>
+                        {ch.group_id && (
+                          <p style={{ fontSize: 11, color: 'var(--muted)', margin: '2px 0 0' }}>
+                            {groups.find((g) => g.id === ch.group_id)?.name ?? ''}
+                          </p>
+                        )}
                       </div>
                       <button
                         onClick={() => testYt(ch)}
@@ -710,6 +724,14 @@ export default function AdminPage() {
                   style={input}
                   required
                 />
+                <select
+                  value={newYt.groupId}
+                  onChange={(e) => setNewYt((y) => ({ ...y, groupId: e.target.value }))}
+                  style={input}
+                >
+                  <option value="">No group</option>
+                  {groups.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+                </select>
                 <p style={{ fontSize: 11, color: 'var(--muted)', margin: 0 }}>
                   Find the channel ID in the channel URL or via youtube.com/@handle → View source → &quot;channelId&quot;
                 </p>
