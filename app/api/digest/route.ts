@@ -5,10 +5,8 @@ export async function GET() {
   const db = supabaseAdmin()
   const { data } = await db
     .from('digests')
-    .select('*')
+    .select('id, date, content, created_at')
     .order('date', { ascending: false })
-    .limit(1)
-    .single()
-  if (!data) return NextResponse.json({ digest: null })
-  return NextResponse.json({ digest: data })
+    .limit(60)
+  return NextResponse.json({ digests: data ?? [] })
 }

@@ -25,14 +25,15 @@ interface Digest {
 }
 
 export default function DigestView() {
-  const [digest, setDigest] = useState<Digest | null>(null)
+  const [digests, setDigests] = useState<Digest[]>([])
+  const [index, setIndex] = useState(0)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetch('/api/digest')
       .then((r) => r.json())
-      .then(({ digest }) => {
-        setDigest(digest)
+      .then(({ digests }) => {
+        setDigests(digests ?? [])
         setLoading(false)
       })
       .catch(() => setLoading(false))
@@ -46,10 +47,7 @@ export default function DigestView() {
             <div
               key={i}
               className="h-4 rounded animate-pulse"
-              style={{
-                background: 'var(--border)',
-                width: `${60 + (i % 3) * 15}%`,
-              }}
+              style={{ background: 'var(--border)', width: `${60 + (i % 3) * 15}%` }}
             />
           ))}
         </div>
@@ -57,7 +55,7 @@ export default function DigestView() {
     )
   }
 
-  if (!digest) {
+  if (digests.length === 0) {
     return (
       <div className="px-5 py-12 max-w-2xl mx-auto text-center">
         <p className="text-sm" style={{ color: 'var(--muted)' }}>
@@ -67,14 +65,54 @@ export default function DigestView() {
     )
   }
 
+  const digest = digests[index]
   const { content } = digest
   const sections: DigestSection[] = content.sections ?? []
+  const hasPrev = index < digests.length - 1
+  const hasNext = index > 0
 
   return (
     <article className="px-5 py-6 max-w-2xl mx-auto pb-[env(safe-area-inset-bottom)]">
-      <p className="text-xs mb-6" style={{ color: 'var(--muted)' }}>
-        {formatDate(digest.date)}
-      </p>
+      {/* Date nav */}
+      <div className="flex items-center justify-between mb-6">
+        <button
+          onClick={() => setIndex((i) => i + 1)}
+          disabled={!hasPrev}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: hasPrev ? 'pointer' : 'default',
+            color: hasPrev ? 'var(--foreground)' : 'var(--border)',
+            padding: '4px 0',
+            fontSize: '18px',
+            lineHeight: 1,
+          }}
+          aria-label="Previous day"
+        >
+          ←
+        </button>
+
+        <p className="text-xs" style={{ color: 'var(--muted)' }}>
+          {formatDate(digest.date)}
+        </p>
+
+        <button
+          onClick={() => setIndex((i) => i - 1)}
+          disabled={!hasNext}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: hasNext ? 'pointer' : 'default',
+            color: hasNext ? 'var(--foreground)' : 'var(--border)',
+            padding: '4px 0',
+            fontSize: '18px',
+            lineHeight: 1,
+          }}
+          aria-label="Next day"
+        >
+          →
+        </button>
+      </div>
 
       {sections.length === 0 && content.raw && (
         <p className="text-sm leading-relaxed" style={{ color: 'var(--muted)' }}>
@@ -90,28 +128,31 @@ export default function DigestView() {
               {section.items.map((item, ii) => (
                 <div key={ii}>
                   {item.url ? (
-                    <a
-                      href={item.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block"
-                    >
-                      <p className="font-medium leading-snug" style={{ marginBottom: '0.35rem', fontFamily: 'inherit' }}>{item.title}</p>
+                    <a href={item.url} target="_blank" rel="noopener noreferrer" className="block">
+                      <p className="font-medium leading-snug" style={{ marginBottom: '0.35rem', fontFamily: 'inherit' }}>
+                        {item.title}
+                      </p>
                       <p className="leading-relaxed" style={{ color: 'var(--muted)', margin: 0 }}>
                         {item.summary}
                       </p>
                       {item.source && (
-                        <p style={{ fontSize: '0.7rem', marginTop: '0.4rem', color: 'var(--muted)', opacity: 0.6, fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif', letterSpacing: '0.03em' }}>{item.source}</p>
+                        <p style={{ fontSize: '0.7rem', marginTop: '0.4rem', color: 'var(--muted)', opacity: 0.6, fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif', letterSpacing: '0.03em' }}>
+                          {item.source}
+                        </p>
                       )}
                     </a>
                   ) : (
                     <div>
-                      <p className="font-medium leading-snug" style={{ marginBottom: '0.35rem', fontFamily: 'inherit' }}>{item.title}</p>
+                      <p className="font-medium leading-snug" style={{ marginBottom: '0.35rem', fontFamily: 'inherit' }}>
+                        {item.title}
+                      </p>
                       <p className="leading-relaxed" style={{ color: 'var(--muted)', margin: 0 }}>
                         {item.summary}
                       </p>
                       {item.source && (
-                        <p style={{ fontSize: '0.7rem', marginTop: '0.4rem', color: 'var(--muted)', opacity: 0.6, fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif', letterSpacing: '0.03em' }}>{item.source}</p>
+                        <p style={{ fontSize: '0.7rem', marginTop: '0.4rem', color: 'var(--muted)', opacity: 0.6, fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif', letterSpacing: '0.03em' }}>
+                          {item.source}
+                        </p>
                       )}
                     </div>
                   )}
