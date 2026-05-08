@@ -135,11 +135,6 @@ export default function DigestView() {
                       <p className="leading-relaxed" style={{ color: 'var(--muted)', margin: 0 }}>
                         {item.summary}
                       </p>
-                      {item.source && (
-                        <p style={{ fontSize: '0.7rem', marginTop: '0.4rem', color: 'var(--muted)', opacity: 0.6, fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif', letterSpacing: '0.03em' }}>
-                          {item.source}
-                        </p>
-                      )}
                     </a>
                   ) : (
                     <div>
@@ -149,11 +144,6 @@ export default function DigestView() {
                       <p className="leading-relaxed" style={{ color: 'var(--muted)', margin: 0 }}>
                         {item.summary}
                       </p>
-                      {item.source && (
-                        <p style={{ fontSize: '0.7rem', marginTop: '0.4rem', color: 'var(--muted)', opacity: 0.6, fontFamily: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif', letterSpacing: '0.03em' }}>
-                          {item.source}
-                        </p>
-                      )}
                     </div>
                   )}
                 </div>

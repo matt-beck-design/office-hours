@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import DigestView from '@/components/DigestView'
 import VideosView from '@/components/VideosView'
-import PushManager from '@/components/PushManager'
 
 type Tab = 'digest' | 'videos'
 
@@ -14,7 +13,7 @@ export default function Home() {
     <div className="flex flex-col h-full" style={{ background: 'var(--background)' }}>
       {/* Header */}
       <header
-        className="flex items-center justify-between px-5 pt-[env(safe-area-inset-top)] pb-0"
+        className="flex items-center px-5 pt-[env(safe-area-inset-top)] pb-0"
         style={{ borderBottom: '1px solid var(--border)' }}
       >
         <span
@@ -23,7 +22,6 @@ export default function Home() {
         >
           Office Hours
         </span>
-        <PushManager />
       </header>
 
       {/* Tab bar */}
