@@ -8,7 +8,5 @@ export async function GET() {
     .select('id, date, content, created_at')
     .order('date', { ascending: false })
     .limit(60)
-  return NextResponse.json({ digests: data ?? [] }, {
-    headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400' },
-  })
+  return NextResponse.json({ digests: data ?? [] })
 }
