@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import ReaderSheet from './ReaderSheet'
 
 interface DigestItem {
   title: string
@@ -28,6 +29,7 @@ export default function DigestView() {
   const [digests, setDigests] = useState<Digest[]>([])
   const [index, setIndex] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [reader, setReader] = useState<{ url: string; title: string } | null>(null)
 
   useEffect(() => {
     fetch('/api/digest')
@@ -72,87 +74,100 @@ export default function DigestView() {
   const hasNext = index > 0
 
   return (
-    <article className="px-5 py-6 mx-auto pb-[env(safe-area-inset-bottom)]" style={{ maxWidth: '576px' }}>
-      {/* Date nav */}
-      <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={() => setIndex((i) => i + 1)}
-          disabled={!hasPrev}
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: hasPrev ? 'pointer' : 'default',
-            color: hasPrev ? 'var(--foreground)' : 'var(--border)',
-            padding: '4px 0',
-            fontSize: '18px',
-            lineHeight: 1,
-          }}
-          aria-label="Previous day"
-        >
-          ←
-        </button>
-
-        <p className="text-xs" style={{ color: 'var(--muted)' }}>
-          {formatDate(digest.date)}
-        </p>
-
-        <button
-          onClick={() => setIndex((i) => i - 1)}
-          disabled={!hasNext}
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: hasNext ? 'pointer' : 'default',
-            color: hasNext ? 'var(--foreground)' : 'var(--border)',
-            padding: '4px 0',
-            fontSize: '18px',
-            lineHeight: 1,
-          }}
-          aria-label="Next day"
-        >
-          →
-        </button>
-      </div>
-
-      {sections.length === 0 && content.raw && (
-        <p className="text-sm leading-relaxed" style={{ color: 'var(--muted)' }}>
-          {content.raw}
-        </p>
+    <>
+      {reader && (
+        <ReaderSheet
+          url={reader.url}
+          fallbackTitle={reader.title}
+          onClose={() => setReader(null)}
+        />
       )}
 
-      <div className="prose-digest">
-        {sections.map((section, si) => (
-          <section key={si} style={{ marginBottom: '2.5rem' }}>
-            <h2>{section.heading}</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-              {section.items.map((item, ii) => (
-                <div key={ii}>
-                  {item.url ? (
-                    <a href={item.url} target="_blank" rel="noopener noreferrer" className="block digest-item">
-                      <p className="font-medium leading-snug" style={{ marginBottom: '0.35rem', fontFamily: 'inherit', color: 'var(--foreground)' }}>
-                        {item.title}
-                      </p>
-                      <p style={{ color: 'var(--muted)', margin: 0, fontSize: '16px', lineHeight: '24px' }}>
-                        {item.summary}
-                      </p>
-                    </a>
-                  ) : (
-                    <div className="digest-item">
-                      <p className="font-medium leading-snug" style={{ marginBottom: '0.35rem', fontFamily: 'inherit', color: 'var(--foreground)' }}>
-                        {item.title}
-                      </p>
-                      <p style={{ color: 'var(--muted)', margin: 0, fontSize: '16px', lineHeight: '24px' }}>
-                        {item.summary}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-        ))}
-      </div>
-    </article>
+      <article className="px-5 py-6 mx-auto pb-[env(safe-area-inset-bottom)]" style={{ maxWidth: '576px' }}>
+        {/* Date nav */}
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={() => setIndex((i) => i + 1)}
+            disabled={!hasPrev}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: hasPrev ? 'pointer' : 'default',
+              color: hasPrev ? 'var(--foreground)' : 'var(--border)',
+              padding: '4px 0',
+              fontSize: '18px',
+              lineHeight: 1,
+            }}
+            aria-label="Previous day"
+          >
+            ←
+          </button>
+
+          <p className="text-xs" style={{ color: 'var(--muted)' }}>
+            {formatDate(digest.date)}
+          </p>
+
+          <button
+            onClick={() => setIndex((i) => i - 1)}
+            disabled={!hasNext}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: hasNext ? 'pointer' : 'default',
+              color: hasNext ? 'var(--foreground)' : 'var(--border)',
+              padding: '4px 0',
+              fontSize: '18px',
+              lineHeight: 1,
+            }}
+            aria-label="Next day"
+          >
+            →
+          </button>
+        </div>
+
+        {sections.length === 0 && content.raw && (
+          <p className="text-sm leading-relaxed" style={{ color: 'var(--muted)' }}>
+            {content.raw}
+          </p>
+        )}
+
+        <div className="prose-digest">
+          {sections.map((section, si) => (
+            <section key={si} style={{ marginBottom: '2.5rem' }}>
+              <h2>{section.heading}</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                {section.items.map((item, ii) => (
+                  <div key={ii}>
+                    {item.url ? (
+                      <button
+                        onClick={() => setReader({ url: item.url, title: item.title })}
+                        className="block digest-item w-full text-left"
+                      >
+                        <p className="font-medium leading-snug" style={{ marginBottom: '0.35rem', fontFamily: 'inherit', color: 'var(--foreground)' }}>
+                          {item.title}
+                        </p>
+                        <p style={{ color: 'var(--muted)', margin: 0, fontSize: '16px', lineHeight: '24px' }}>
+                          {item.summary}
+                        </p>
+                      </button>
+                    ) : (
+                      <div className="digest-item">
+                        <p className="font-medium leading-snug" style={{ marginBottom: '0.35rem', fontFamily: 'inherit', color: 'var(--foreground)' }}>
+                          {item.title}
+                        </p>
+                        <p style={{ color: 'var(--muted)', margin: 0, fontSize: '16px', lineHeight: '24px' }}>
+                          {item.summary}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </article>
+    </>
   )
 }
 
