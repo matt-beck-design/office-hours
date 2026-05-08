@@ -41,7 +41,7 @@ export default function DigestView() {
 
   if (loading) {
     return (
-      <div className="px-5 py-8 max-w-2xl mx-auto">
+      <div className="px-5 py-8 mx-auto" style={{ maxWidth: '576px' }}>
         <div className="space-y-3">
           {[...Array(6)].map((_, i) => (
             <div
@@ -57,7 +57,7 @@ export default function DigestView() {
 
   if (digests.length === 0) {
     return (
-      <div className="px-5 py-12 max-w-2xl mx-auto text-center">
+      <div className="px-5 py-12 mx-auto text-center" style={{ maxWidth: '576px' }}>
         <p className="text-sm" style={{ color: 'var(--muted)' }}>
           No digest yet. The daily cron runs at 7am PT.
         </p>
@@ -72,7 +72,7 @@ export default function DigestView() {
   const hasNext = index > 0
 
   return (
-    <article className="px-5 py-6 max-w-2xl mx-auto pb-[env(safe-area-inset-bottom)]">
+    <article className="px-5 py-6 mx-auto pb-[env(safe-area-inset-bottom)]" style={{ maxWidth: '576px' }}>
       {/* Date nav */}
       <div className="flex items-center justify-between mb-6">
         <button
@@ -124,24 +124,24 @@ export default function DigestView() {
         {sections.map((section, si) => (
           <section key={si} style={{ marginBottom: '2.5rem' }}>
             <h2>{section.heading}</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
               {section.items.map((item, ii) => (
                 <div key={ii}>
                   {item.url ? (
-                    <a href={item.url} target="_blank" rel="noopener noreferrer" className="block">
-                      <p className="font-medium leading-snug" style={{ marginBottom: '0.35rem', fontFamily: 'inherit' }}>
+                    <a href={item.url} target="_blank" rel="noopener noreferrer" className="block digest-item">
+                      <p className="font-medium leading-snug" style={{ marginBottom: '0.35rem', fontFamily: 'inherit', color: 'var(--foreground)' }}>
                         {item.title}
                       </p>
-                      <p className="leading-relaxed" style={{ color: 'var(--muted)', margin: 0 }}>
+                      <p style={{ color: 'var(--muted)', margin: 0, fontSize: '16px', lineHeight: '24px' }}>
                         {item.summary}
                       </p>
                     </a>
                   ) : (
-                    <div>
-                      <p className="font-medium leading-snug" style={{ marginBottom: '0.35rem', fontFamily: 'inherit' }}>
+                    <div className="digest-item">
+                      <p className="font-medium leading-snug" style={{ marginBottom: '0.35rem', fontFamily: 'inherit', color: 'var(--foreground)' }}>
                         {item.title}
                       </p>
-                      <p className="leading-relaxed" style={{ color: 'var(--muted)', margin: 0 }}>
+                      <p style={{ color: 'var(--muted)', margin: 0, fontSize: '16px', lineHeight: '24px' }}>
                         {item.summary}
                       </p>
                     </div>

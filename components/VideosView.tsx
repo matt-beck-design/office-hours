@@ -29,9 +29,9 @@ export default function VideosView() {
 
   if (loading) {
     return (
-      <div className="px-5 py-6 max-w-2xl mx-auto space-y-4">
+      <div className="px-5 py-6 mx-auto space-y-2" style={{ maxWidth: '576px' }}>
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="flex gap-3">
+          <div key={i} className="flex gap-3 p-4 rounded-lg">
             <div
               className="w-32 h-[72px] rounded-sm flex-shrink-0 animate-pulse"
               style={{ background: 'var(--border)' }}
@@ -58,7 +58,7 @@ export default function VideosView() {
 
   if (videos.length === 0) {
     return (
-      <div className="px-5 py-12 max-w-2xl mx-auto text-center">
+      <div className="px-5 py-12 mx-auto text-center" style={{ maxWidth: '576px' }}>
         <p className="text-sm" style={{ color: 'var(--muted)' }}>
           No videos yet. Add YouTube channels to <code>sources.config.js</code>.
         </p>
@@ -67,15 +67,15 @@ export default function VideosView() {
   }
 
   return (
-    <div className="px-5 py-6 max-w-2xl mx-auto pb-[env(safe-area-inset-bottom)]">
-      <div className="flex flex-col gap-5">
+    <div className="px-5 py-6 mx-auto pb-[env(safe-area-inset-bottom)]" style={{ maxWidth: '576px' }}>
+      <div className="flex flex-col gap-1">
         {videos.map((video) => (
           <a
             key={video.id}
             href={video.video_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex gap-3"
+            className="flex gap-3 video-item"
           >
             {video.thumbnail_url && (
               <div className="w-32 h-[72px] flex-shrink-0 rounded-sm overflow-hidden relative">
