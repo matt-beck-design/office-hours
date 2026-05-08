@@ -86,27 +86,44 @@ export async function fetchYouTubeChannel(
   channelId: string,
   channelName: string,
 ): Promise<VideoItem[]> {
-  // YouTube RSS feed — no API key required
-  const url = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`
+  const apiKey = process.env.YOUTUBE_API_KEY
+  if (!apiKey) return []
+
   try {
-    const feed = await rssParser.parseURL(url)
-    return (feed.items ?? []).slice(0, 10).map((item) => ({
-      channelId,
-      channelName,
-      title: item.title ?? '',
-      thumbnailUrl: extractYtThumbnail(item.link ?? ''),
-      videoUrl: item.link ?? '',
-      publishedAt: item.isoDate ?? item.pubDate ?? new Date().toISOString(),
-    }))
+    // Get the uploads playlist ID (same as channel ID with UC→UU)
+    const uploadsPlaylistId = 'UU' + channelId.slice(2)
+    const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=10&playlistId=${uploadsPlaylistId}&key=${apiKey}`
+    const res = await fetch(url)
+    if (!res.ok) return []
+    const data = await res.json()
+
+    return (data.items ?? []).map((item: YouTubeApiItem) => {
+      const snippet = item.snippet
+      const videoId = snippet.resourceId?.videoId ?? ''
+      return {
+        channelId,
+        channelName,
+        title: snippet.title ?? '',
+        thumbnailUrl: snippet.thumbnails?.medium?.url ?? snippet.thumbnails?.default?.url ?? '',
+        videoUrl: `https://www.youtube.com/watch?v=${videoId}`,
+        publishedAt: snippet.publishedAt ?? new Date().toISOString(),
+      }
+    })
   } catch {
     return []
   }
 }
 
-function extractYtThumbnail(videoUrl: string): string {
-  const match = videoUrl.match(/[?&]v=([^&]+)/)
-  if (!match) return ''
-  return `https://i.ytimg.com/vi/${match[1]}/mqdefault.jpg`
+interface YouTubeApiItem {
+  snippet: {
+    title: string
+    publishedAt: string
+    resourceId?: { videoId: string }
+    thumbnails?: {
+      default?: { url: string }
+      medium?: { url: string }
+    }
+  }
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
