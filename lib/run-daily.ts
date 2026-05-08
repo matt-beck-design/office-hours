@@ -120,10 +120,14 @@ Rules:
   })
 
   const rawText = response.content[0].type === 'text' ? response.content[0].text : ''
-  const cleaned = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()
   let digestContent: object
   try {
-    digestContent = JSON.parse(cleaned)
+    // Strip markdown fences if present, then find outermost JSON object
+    const stripped = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim()
+    const start = stripped.indexOf('{')
+    const end = stripped.lastIndexOf('}')
+    const jsonStr = start !== -1 && end !== -1 ? stripped.slice(start, end + 1) : stripped
+    digestContent = JSON.parse(jsonStr)
   } catch {
     digestContent = { date: today, raw: rawText, sections: [] }
   }
