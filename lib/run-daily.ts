@@ -87,6 +87,13 @@ Return a JSON object with this shape:
   ]
 }
 
+Content preferences:
+- He cares about: single-player games, RPGs of all kinds, action-adventure, horror, fantasy, sci-fi, AAA releases, and platform/industry strategy
+- Multiplayer stories only if they represent a dramatic industry moment — a game's collapse, a surprising success, a major shift in how live service works
+- Prioritize anything touching: Xbox and Microsoft Gaming, Remedy (Alan Wake, Control), Silent Hill, Bethesda, CD Projekt Red (Cyberpunk, The Witcher), Larian (Baldur's Gate), Obsidian, Disco Elysium / ZAUM / Robert Kurvitz, platform holder hardware announcements, Game Pass strategy, first-party studio news
+- Prioritize: studio acquisitions, closures, layoffs, and any news about the structural health of the industry
+- Deprioritize or skip: sports games, mobile games, free-to-play live service updates (unless dramatic), esports, battle royale, anything that's purely a multiplayer-as-a-service story with no broader significance
+
 Rules:
 - Infer category headings from the actual content — don't force a taxonomy, let the day's news suggest its own shape
 - Combine related stories across sources into one item — if five outlets covered the same announcement, that's one entry, not five
