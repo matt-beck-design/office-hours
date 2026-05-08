@@ -68,14 +68,14 @@ export default function VideosView() {
 
   return (
     <div className="px-5 py-6 max-w-2xl mx-auto pb-[env(safe-area-inset-bottom)]">
-      <div className="divide-y" style={{ borderColor: 'var(--border)' }}>
+      <div className="flex flex-col gap-5">
         {videos.map((video) => (
           <a
             key={video.id}
             href={video.video_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex gap-3 py-4 first:pt-0"
+            className="flex gap-3"
           >
             {video.thumbnail_url && (
               <div className="w-32 h-[72px] flex-shrink-0 rounded-sm overflow-hidden relative">
