@@ -19,6 +19,7 @@ interface FeedGroup {
   id: string
   name: string
   topic: string
+  context?: string
   position: number
   feed_sources: FeedSource[]
 }
@@ -80,10 +81,14 @@ export default function AdminPage() {
   const [youtube, setYoutube] = useState<YouTubeChannel[]>([])
   const [dataLoading, setDataLoading] = useState(false)
 
+  // Bio
+  const [bio, setBio] = useState('')
+  const [bioSaving, setBioSaving] = useState(false)
+
   // Group forms
   const [showNewGroup, setShowNewGroup] = useState(false)
-  const [newGroup, setNewGroup] = useState({ name: '', topic: '' })
-  const [editingGroup, setEditingGroup] = useState<{ id: string; name: string; topic: string } | null>(null)
+  const [newGroup, setNewGroup] = useState({ name: '', topic: '', context: '' })
+  const [editingGroup, setEditingGroup] = useState<{ id: string; name: string; topic: string; context: string } | null>(null)
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set())
 
   function toggleCollapse(id: string) {
@@ -144,18 +149,31 @@ export default function AdminPage() {
 
   const loadData = useCallback(async () => {
     setDataLoading(true)
-    const [gRes, yRes] = await Promise.all([
+    const [gRes, yRes, bioRes] = await Promise.all([
       fetch('/api/admin/groups').then((r) => r.json()),
       fetch('/api/admin/youtube').then((r) => r.json()),
+      fetch('/api/admin/settings?key=user_bio').then((r) => r.json()),
     ])
     setGroups(gRes.groups ?? [])
     setYoutube(yRes.channels ?? [])
+    setBio(bioRes.value ?? '')
     setDataLoading(false)
   }, [])
 
   useEffect(() => { if (authed) loadData() }, [authed, loadData])
 
   // ── Groups ──────────────────────────────────────────────────────────────────
+
+  async function saveBio(e: React.FormEvent) {
+    e.preventDefault()
+    setBioSaving(true)
+    await fetch('/api/admin/settings', {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ key: 'user_bio', value: bio }),
+    })
+    setBioSaving(false)
+  }
 
   async function createGroup(e: React.FormEvent) {
     e.preventDefault()
@@ -164,7 +182,7 @@ export default function AdminPage() {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(newGroup),
     })
-    setNewGroup({ name: '', topic: '' })
+    setNewGroup({ name: '', topic: '', context: '' })
     setShowNewGroup(false)
     loadData()
   }
@@ -175,7 +193,7 @@ export default function AdminPage() {
     await fetch(`/api/admin/groups/${editingGroup.id}`, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ name: editingGroup.name, topic: editingGroup.topic }),
+      body: JSON.stringify({ name: editingGroup.name, topic: editingGroup.topic, context: editingGroup.context }),
     })
     setEditingGroup(null)
     loadData()
@@ -408,6 +426,12 @@ export default function AdminPage() {
                       style={input}
                       required
                     />
+                    <textarea
+                      value={editingGroup.context}
+                      onChange={(e) => setEditingGroup((g) => g && ({ ...g, context: e.target.value }))}
+                      placeholder="What should Claude focus on for this group? Interests, preferences, things to skip…"
+                      style={{ ...input, minHeight: 80, resize: 'vertical' }}
+                    />
                     <div style={{ display: 'flex', gap: 8 }}>
                       <button type="submit" style={btn('primary')}>Save</button>
                       <button type="button" onClick={() => setEditingGroup(null)} style={btn()}>Cancel</button>
@@ -429,7 +453,7 @@ export default function AdminPage() {
                     </div>
                     <div style={{ display: 'flex', gap: 6, flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
                       <button
-                        onClick={() => setEditingGroup({ id: group.id, name: group.name, topic: group.topic })}
+                        onClick={() => setEditingGroup({ id: group.id, name: group.name, topic: group.topic, context: group.context ?? '' })}
                         style={btn('ghost')}
                       >
                         Edit
@@ -629,6 +653,12 @@ export default function AdminPage() {
                   style={input}
                   required
                 />
+                <textarea
+                  placeholder="What should Claude focus on for this group? Interests, preferences, things to skip…"
+                  value={newGroup.context}
+                  onChange={(e) => setNewGroup((g) => ({ ...g, context: e.target.value }))}
+                  style={{ ...input, minHeight: 80, resize: 'vertical' }}
+                />
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button type="submit" style={btn('primary')}>Create group</button>
                   <button type="button" onClick={() => setShowNewGroup(false)} style={btn()}>Cancel</button>
@@ -768,6 +798,29 @@ export default function AdminPage() {
         {/* ── Controls tab ─────────────────────────────────────────────────── */}
         {tab === 'controls' && (
           <div style={{ display: 'grid', gap: 20 }}>
+
+            {/* Bio */}
+            <div style={{ border: '1px solid var(--border)', borderRadius: 8, padding: '16px' }}>
+              <p style={{ fontWeight: 600, fontSize: 14, margin: '0 0 4px' }}>About you</p>
+              <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 14px' }}>
+                Tell Claude who you are — your interests, what you care about, what to skip. This shapes the personal note at the top of each feed group.
+              </p>
+              <form onSubmit={saveBio} style={{ display: 'grid', gap: 10 }}>
+                <textarea
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  placeholder="e.g. I'm a product designer in LA. I follow gaming closely — single-player, RPGs, Xbox strategy. I also read broadly: design, tech, politics. Skip anything sports, mobile, or esports."
+                  style={{ ...input, minHeight: 100, resize: 'vertical' }}
+                />
+                <button
+                  type="submit"
+                  disabled={bioSaving}
+                  style={btn('primary', { justifySelf: 'start', opacity: bioSaving ? 0.6 : 1 })}
+                >
+                  {bioSaving ? 'Saving…' : 'Save'}
+                </button>
+              </form>
+            </div>
 
             {/* Seed */}
             <ControlCard

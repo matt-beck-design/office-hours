@@ -7,5 +7,7 @@ export async function GET() {
     .from('feed_groups')
     .select('id, name')
     .order('position', { ascending: true })
-  return NextResponse.json({ groups: data ?? [] })
+  return NextResponse.json({ groups: data ?? [] }, {
+    headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400' },
+  })
 }

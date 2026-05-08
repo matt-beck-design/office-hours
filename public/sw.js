@@ -1,8 +1,8 @@
-const CACHE = 'office-hours-v1'
-const DIGEST_CACHE = 'office-hours-digest-v1'
+const CACHE = 'office-hours-v2'
+const API_CACHE = 'office-hours-api-v2'
 
-// Static shell assets to precache
 const SHELL = ['/', '/manifest.json']
+const API_ROUTES = ['/api/digest', '/api/groups', '/api/videos']
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -16,7 +16,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((k) => k !== CACHE && k !== DIGEST_CACHE)
+          .filter((k) => k !== CACHE && k !== API_CACHE)
           .map((k) => caches.delete(k))
       )
     )
@@ -27,21 +27,22 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url)
 
-  // Cache digest API response for offline fallback
-  if (url.pathname === '/api/digest') {
+  // API routes: stale-while-revalidate — serve cache instantly, update in background
+  if (API_ROUTES.includes(url.pathname)) {
     event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          const clone = response.clone()
-          caches.open(DIGEST_CACHE).then((cache) => cache.put(event.request, clone))
+      caches.open(API_CACHE).then(async (cache) => {
+        const cached = await cache.match(event.request)
+        const fetchPromise = fetch(event.request).then((response) => {
+          if (response.ok) cache.put(event.request, response.clone())
           return response
-        })
-        .catch(() => caches.match(event.request))
+        }).catch(() => null)
+        return cached ?? fetchPromise
+      })
     )
     return
   }
 
-  // Navigation: serve app shell, fall back to cache
+  // Navigation: network-first, fall back to cached shell
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() => caches.match('/'))
@@ -55,7 +56,6 @@ self.addEventListener('fetch', (event) => {
   )
 })
 
-// Push notifications
 self.addEventListener('push', (event) => {
   if (!event.data) return
   let data = {}

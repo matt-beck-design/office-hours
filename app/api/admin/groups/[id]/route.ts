@@ -10,7 +10,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const db = supabaseAdmin()
   const { data, error } = await db
     .from('feed_groups')
-    .update({ name: body.name, topic: body.topic })
+    .update({ name: body.name, topic: body.topic, context: body.context ?? null })
     .eq('id', id)
     .select()
     .single()

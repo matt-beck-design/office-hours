@@ -60,23 +60,34 @@ export async function runDailyDigest(): Promise<{ date: string }> {
     }
   }
 
-  // ── 3. Build Claude prompt ─────────────────────────────────────────────────
+  // ── 3. Fetch user bio and group contexts ───────────────────────────────────
+  const { data: bioRow } = await db.from('settings').select('value').eq('key', 'user_bio').single()
+  const userBio = bioRow?.value ?? ''
+
+  const { data: groupRows } = await db.from('feed_groups').select('name, context')
+  const groupContextMap = new Map((groupRows ?? []).map((g) => [g.name, g.context as string | null]))
+
+  // ── 4. Build Claude prompt ─────────────────────────────────────────────────
   const groupNames = allItems.map(({ group }) => group)
 
   const feedContext = allItems
     .map(({ group, topic, items }) => {
+      const context = groupContextMap.get(group)
+      const meta = [topic && `topic: ${topic}`, context && `context: ${context}`].filter(Boolean).join(' | ')
       const itemLines = items.map((i) => `- [${i.source}] ${i.title}: ${i.summary} (url: ${i.url})`).join('\n')
-      return `## ${group} (topic hint: ${topic})\n${itemLines}`
+      return `## ${group}${meta ? ` (${meta})` : ''}\n${itemLines}`
     })
     .join('\n\n')
+
+  const bioSection = userBio ? `About the reader:\n${userBio}\n\n` : ''
 
   const client = new Anthropic()
   const response = await client.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 4096,
-    system: `You are writing a daily news digest for a single reader — a product designer in Los Angeles with a sharp eye for what actually matters. He follows gaming news closely (Xbox strategy, first-party studios, industry structure) but reads broadly. He values craft, intentionality, and original thinking. He has no patience for hype, PR spin, or stories that exist only to fill a feed.
+    system: `You are writing a daily news digest for a single reader.
 
-Your job is to be the smart friend who read everything so he doesn't have to — and tells him what's actually going on, not just what happened.
+${bioSection}Your job is to be the smart friend who read everything so they don't have to — and tells them what's actually going on, not just what happened.
 
 Return a JSON object with this shape:
 {
@@ -84,27 +95,21 @@ Return a JSON object with this shape:
   "sections": [
     {
       "heading": "string",
+      "note": "string — 1-3 sentences in a direct, personal voice. Give the reader a topline read of what's happening in this group today and what it means for them specifically, informed by their bio and any group context provided. Write it like a message to a friend: casual, direct, no throat-clearing. Use an empty string if nothing notable happened.",
       "items": [
-        { "title": "string", "summary": "string (2-3 sentences)", "url": "string", "source": "string" }
+        { "title": "string", "summary": "string", "url": "string", "source": "string" }
       ]
     }
   ]
 }
 
-Content preferences:
-- He cares about: single-player games, RPGs of all kinds, action-adventure, horror, fantasy, sci-fi, AAA releases, and platform/industry strategy
-- Multiplayer stories only if they represent a dramatic industry moment — a game's collapse, a surprising success, a major shift in how live service works
-- Prioritize anything touching: Xbox and Microsoft Gaming, Remedy (Alan Wake, Control), Silent Hill, Bethesda, CD Projekt Red (Cyberpunk, The Witcher), Larian (Baldur's Gate), Obsidian, Disco Elysium / ZAUM / Robert Kurvitz, platform holder hardware announcements, Game Pass strategy, first-party studio news
-- Prioritize: studio acquisitions, closures, layoffs, and any news about the structural health of the industry
-- Deprioritize or skip: sports games, mobile games, free-to-play live service updates (unless dramatic), esports, battle royale, anything that's purely a multiplayer-as-a-service story with no broader significance
-
 Rules:
 - Use the exact feed group names provided as section headings — do not invent or rename them
+- Use any group context provided to filter and prioritize — it tells you what this reader cares about in that group
 - Combine related stories across sources into one item — if five outlets covered the same announcement, that's one entry, not five
-- Write summaries the way a thoughtful person would explain something to a friend: direct, a little dry, no throat-clearing. "Microsoft quietly shelved the project" not "In a surprising move that has sent shockwaves through the gaming community"
+- Write summaries the way a thoughtful person would explain something to a friend: direct, a little dry, no throat-clearing
 - Flag the signal-to-noise ratio honestly — if a rumor comes from a reliable insider, say so. If it's thin, say it's thin
 - Skip: listicles, reviews, deals posts, YouTube thumbnail bait, anything that's just reacting to a tweet with no new information
-- If something is genuinely surprising or significant, it's okay to say so — one dry observation is fine, editorializing is not
 - Rumors and confirmed news should feel distinct — don't present speculation with the same weight as a press release
 - Each feed item includes a url — always use the exact provided url, never construct or guess one
 - Include items from the last 48 hours
