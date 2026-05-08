@@ -92,6 +92,9 @@ export default function AdminPage() {
   const [showNewYt, setShowNewYt] = useState(false)
   const [newYt, setNewYt] = useState({ name: '', channelId: '' })
 
+  // Source test results, keyed by source id
+  const [testResults, setTestResults] = useState<Record<string, { state: 'running' | 'ok' | 'error'; message: string; preview?: { title: string; published: string }[] }>>({})
+
   // Controls
   const [ctrlStatus, setCtrlStatus] = useState<{ action: string; state: 'idle' | 'running' | 'done' | 'error'; message: string }>({ action: '', state: 'idle', message: '' })
 
@@ -196,6 +199,24 @@ export default function AdminPage() {
   async function deleteSource(id: string) {
     await fetch(`/api/admin/sources/${id}`, { method: 'DELETE' })
     loadData()
+  }
+
+  async function testSource(src: FeedSource) {
+    setTestResults((r) => ({ ...r, [src.id]: { state: 'running', message: 'Testing…' } }))
+    const res = await fetch('/api/admin/test-source', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ type: src.type, url: src.url, handle: src.handle, name: src.name }),
+    })
+    const data = await res.json()
+    setTestResults((r) => ({
+      ...r,
+      [src.id]: {
+        state: data.ok ? 'ok' : 'error',
+        message: data.ok ? `${data.count} items fetched` : data.message,
+        preview: data.preview,
+      },
+    }))
   }
 
   // ── YouTube ─────────────────────────────────────────────────────────────────
@@ -370,26 +391,47 @@ export default function AdminPage() {
                         {tierSources.length === 0 && addSourceKey !== key && (
                           <p style={{ fontSize: 12, color: 'var(--muted)', margin: 0 }}>No sources yet.</p>
                         )}
-                        {tierSources.map((src) => (
-                          <div
-                            key={src.id}
-                            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0', borderBottom: '1px solid var(--border)' }}
-                          >
-                            <span style={{ fontSize: 13, flex: '0 0 auto', fontWeight: 500 }}>{src.name}</span>
-                            <span style={{ fontSize: 11, color: 'var(--muted)', padding: '1px 5px', border: '1px solid var(--border)', borderRadius: 3, flex: '0 0 auto' }}>
-                              {src.type}
-                            </span>
-                            <span style={{ fontSize: 12, color: 'var(--muted)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              {src.type === 'rss' ? src.url : `@${src.handle}`}
-                            </span>
-                            <button
-                              onClick={() => deleteSource(src.id)}
-                              style={btn('ghost', { color: '#c00', padding: '2px 6px', minHeight: 24, flex: '0 0 auto' })}
-                            >
-                              ×
-                            </button>
-                          </div>
-                        ))}
+                        {tierSources.map((src) => {
+                          const result = testResults[src.id]
+                          return (
+                            <div key={src.id} style={{ borderBottom: '1px solid var(--border)', paddingBottom: 8, marginBottom: 2 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0' }}>
+                                <span style={{ fontSize: 13, flex: '0 0 auto', fontWeight: 500 }}>{src.name}</span>
+                                <span style={{ fontSize: 11, color: 'var(--muted)', padding: '1px 5px', border: '1px solid var(--border)', borderRadius: 3, flex: '0 0 auto' }}>
+                                  {src.type}
+                                </span>
+                                <span style={{ fontSize: 12, color: 'var(--muted)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {src.type === 'rss' ? src.url : `@${src.handle}`}
+                                </span>
+                                <button
+                                  onClick={() => testSource(src)}
+                                  disabled={result?.state === 'running'}
+                                  style={btn('ghost', { fontSize: 12, padding: '2px 6px', minHeight: 24, flex: '0 0 auto', color: 'var(--muted)' })}
+                                >
+                                  {result?.state === 'running' ? '…' : 'Test'}
+                                </button>
+                                <button
+                                  onClick={() => deleteSource(src.id)}
+                                  style={btn('ghost', { color: '#c00', padding: '2px 6px', minHeight: 24, flex: '0 0 auto' })}
+                                >
+                                  ×
+                                </button>
+                              </div>
+                              {result && result.state !== 'running' && (
+                                <div style={{ paddingLeft: 2 }}>
+                                  <p style={{ fontSize: 12, color: result.state === 'ok' ? '#2a7a2a' : '#c00', margin: '2px 0 4px' }}>
+                                    {result.state === 'ok' ? '✓' : '✗'} {result.message}
+                                  </p>
+                                  {result.preview?.map((p, i) => (
+                                    <p key={i} style={{ fontSize: 11, color: 'var(--muted)', margin: '2px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                      {relativeTime(p.published)} — {p.title}
+                                    </p>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )
+                        })}
 
                         {/* Inline add-source form */}
                         {addSourceKey === key && (
@@ -613,4 +655,13 @@ function ControlCard({
       </div>
     </div>
   )
+}
+
+function relativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime()
+  const h = Math.floor(diff / 3600000)
+  if (h < 1) return 'just now'
+  if (h < 24) return `${h}h ago`
+  const d = Math.floor(h / 24)
+  return `${d}d ago`
 }
