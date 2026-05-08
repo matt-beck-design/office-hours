@@ -132,7 +132,7 @@ export default function DigestView() {
                       <p className="font-medium leading-snug" style={{ marginBottom: '0.35rem', fontFamily: 'inherit', color: 'var(--foreground)' }}>
                         {item.title}
                       </p>
-                      <p style={{ color: 'var(--muted)', margin: 0, fontSize: '14px', lineHeight: '20px' }}>
+                      <p style={{ color: 'var(--muted)', margin: 0, fontSize: '16px', lineHeight: '24px' }}>
                         {item.summary}
                       </p>
                     </a>
@@ -141,7 +141,7 @@ export default function DigestView() {
                       <p className="font-medium leading-snug" style={{ marginBottom: '0.35rem', fontFamily: 'inherit', color: 'var(--foreground)' }}>
                         {item.title}
                       </p>
-                      <p style={{ color: 'var(--muted)', margin: 0, fontSize: '14px', lineHeight: '20px' }}>
+                      <p style={{ color: 'var(--muted)', margin: 0, fontSize: '16px', lineHeight: '24px' }}>
                         {item.summary}
                       </p>
                     </div>
