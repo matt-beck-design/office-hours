@@ -113,7 +113,7 @@ app/
   api/cron/daily/           — daily ingest cron
 components/
   ContentStream.tsx         — content-type streams
-  ReleaseCalendar.tsx       — month calendar + coming soon
+  ReleaseCalendar.tsx       — upcoming release feed
   ReaderSheet.tsx           — in-app article reader
   PushManager.tsx           — notification subscribe button
 ```

@@ -12,15 +12,11 @@ import {
 
 type KindFilter = 'all' | ReleaseKind
 
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-
 export default function ReleaseCalendar() {
-  const now = new Date()
-  const [year, setYear] = useState(now.getFullYear())
-  const [month, setMonth] = useState(now.getMonth())
   const [releases, setReleases] = useState<Release[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<KindFilter>('all')
+  const [showPast, setShowPast] = useState(false)
   const [form, setForm] = useState<Partial<Release> & { release_date: string } | null>(null)
 
   const today = todayDateStr()
@@ -40,39 +36,24 @@ export default function ReleaseCalendar() {
     [releases, filter],
   )
 
-  const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`
-  const daysInMonth = new Date(year, month + 1, 0).getDate()
-  const startWeekday = new Date(year, month, 1).getDay()
+  const upcoming = useMemo(
+    () =>
+      filtered
+        .filter((r) => r.release_date >= today)
+        .sort((a, b) => a.release_date.localeCompare(b.release_date) || a.title.localeCompare(b.title)),
+    [filtered, today],
+  )
 
-  const byDate = useMemo(() => {
-    const map = new Map<string, Release[]>()
-    for (const r of filtered) {
-      const list = map.get(r.release_date) ?? []
-      list.push(r)
-      map.set(r.release_date, list)
-    }
-    return map
-  }, [filtered])
+  const past = useMemo(
+    () =>
+      filtered
+        .filter((r) => r.release_date < today)
+        .sort((a, b) => b.release_date.localeCompare(a.release_date) || a.title.localeCompare(b.title)),
+    [filtered, today],
+  )
 
-  const monthReleases = filtered
-    .filter((r) => r.release_date.startsWith(monthKey))
-    .sort((a, b) => a.release_date.localeCompare(b.release_date) || a.title.localeCompare(b.title))
-
-  const upcoming = monthReleases.filter((r) => r.release_date >= today)
-  const released = monthReleases.filter((r) => r.release_date < today)
-
-  const comingSoon = useMemo(() => {
-    const end = addDays(today, 90)
-    return filtered
-      .filter((r) => r.release_date >= today && r.release_date <= end)
-      .sort((a, b) => a.release_date.localeCompare(b.release_date) || a.title.localeCompare(b.title))
-  }, [filtered, today])
-
-  function shiftMonth(delta: number) {
-    const next = new Date(year, month + delta, 1)
-    setYear(next.getFullYear())
-    setMonth(next.getMonth())
-  }
+  const upcomingGroups = useMemo(() => groupByMonth(upcoming), [upcoming])
+  const pastGroups = useMemo(() => groupByMonth(past), [past])
 
   function upsert(release: Release) {
     setReleases((prev) => {
@@ -119,35 +100,19 @@ export default function ReleaseCalendar() {
         style={{ maxWidth: '576px', padding: '20px 16px 32px' }}
       >
         <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-3">
-            <button type="button" onClick={() => shiftMonth(-1)} aria-label="Previous month" style={navBtn}>
-              ←
-            </button>
-            <h1
-              className="text-base font-medium"
-              style={{ margin: 0, minWidth: 160, textAlign: 'center', cursor: 'pointer' }}
-              onClick={() => {
-                const n = new Date()
-                setYear(n.getFullYear())
-                setMonth(n.getMonth())
-              }}
-            >
-              {new Date(year, month, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-            </h1>
-            <button type="button" onClick={() => shiftMonth(1)} aria-label="Next month" style={navBtn}>
-              →
-            </button>
-          </div>
+          <h1 className="text-base font-medium" style={{ margin: 0 }}>
+            Coming up
+          </h1>
           <button
             type="button"
-            onClick={() => setForm({ release_date: todayInMonth(year, month, today) })}
+            onClick={() => setForm({ release_date: today })}
             style={addBtn}
           >
             Add
           </button>
         </div>
 
-        <div className="flex gap-2 overflow-x-auto mb-5" style={{ scrollbarWidth: 'none' }}>
+        <div className="flex gap-2 overflow-x-auto mb-6" style={{ scrollbarWidth: 'none' }}>
           <FilterChip active={filter === 'all'} onClick={() => setFilter('all')} label="All" />
           {RELEASE_KINDS.map((k) => (
             <FilterChip
@@ -159,81 +124,58 @@ export default function ReleaseCalendar() {
           ))}
         </div>
 
-        <div className="cal-grid mb-6">
-          {WEEKDAYS.map((d) => (
-            <div key={d} className="cal-dow">
-              {d}
-            </div>
-          ))}
-          {Array.from({ length: startWeekday }, (_, i) => (
-            <div key={`pad-${i}`} />
-          ))}
-          {Array.from({ length: daysInMonth }, (_, i) => {
-            const day = i + 1
-            const dateStr = `${monthKey}-${String(day).padStart(2, '0')}`
-            const items = byDate.get(dateStr) ?? []
-            const isToday = dateStr === today
-            return (
-              <button
-                key={dateStr}
-                type="button"
-                className="cal-day"
-                data-today={isToday ? 'true' : undefined}
-                onClick={() => setForm({ release_date: dateStr })}
-                aria-label={`${formatLong(dateStr)}${items.length ? `, ${items.length} releases` : ''}`}
-              >
-                <span>{day}</span>
-                {items.length > 0 && (
-                  <span className="cal-dots">
-                    {items.slice(0, 3).map((item) => (
-                      <span key={item.id} className="cal-dot" />
-                    ))}
-                  </span>
-                )}
-              </button>
-            )
-          })}
-        </div>
-
-        {isCurrentMonth(year, month, today) && comingSoon.length > 0 && (
-          <section className="mb-8">
-            <SectionLabel>Coming soon</SectionLabel>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              {comingSoon.map((r) => (
-                <ReleaseRow key={r.id} release={r} today={today} onOpen={() => setForm(r)} />
-              ))}
-            </div>
-          </section>
+        {upcoming.length === 0 ? (
+          <p className="text-sm" style={{ color: 'var(--muted)', margin: '0 0 24px', padding: '0 4px' }}>
+            Nothing coming up. Add a release to start tracking.
+          </p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+            {upcomingGroups.map((group) => (
+              <section key={group.key}>
+                <SectionLabel>{group.label}</SectionLabel>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  {group.items.map((r) => (
+                    <ReleaseRow key={r.id} release={r} today={today} onOpen={() => setForm(r)} />
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
         )}
 
-        {(!isCurrentMonth(year, month, today) || comingSoon.length === 0) && (
-          <section className="mb-8">
-            <SectionLabel>
-              {upcoming.length > 0 ? 'This month' : released.length > 0 ? 'Released' : 'This month'}
-            </SectionLabel>
-            {monthReleases.length === 0 ? (
-              <p className="text-sm" style={{ color: 'var(--muted)', margin: 0 }}>
-                Nothing on the calendar this month.
-              </p>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                {(upcoming.length > 0 ? upcoming : released).map((r) => (
-                  <ReleaseRow key={r.id} release={r} today={today} onOpen={() => setForm(r)} />
+        {past.length > 0 && (
+          <div style={{ marginTop: 32 }}>
+            <button
+              type="button"
+              onClick={() => setShowPast((v) => !v)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--muted)',
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: 'pointer',
+                padding: '8px 4px',
+              }}
+            >
+              {showPast ? 'Hide past releases' : `Show past releases (${past.length})`}
+            </button>
+
+            {showPast && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem', marginTop: 12 }}>
+                {pastGroups.map((group) => (
+                  <section key={group.key}>
+                    <SectionLabel>{group.label}</SectionLabel>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      {group.items.map((r) => (
+                        <ReleaseRow key={r.id} release={r} today={today} onOpen={() => setForm(r)} />
+                      ))}
+                    </div>
+                  </section>
                 ))}
               </div>
             )}
-          </section>
-        )}
-
-        {isCurrentMonth(year, month, today) && released.length > 0 && (
-          <section>
-            <SectionLabel>Already out</SectionLabel>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              {released.map((r) => (
-                <ReleaseRow key={r.id} release={r} today={today} onOpen={() => setForm(r)} />
-              ))}
-            </div>
-          </section>
+          </div>
         )}
       </div>
     </>
@@ -250,20 +192,27 @@ function ReleaseRow({
   onOpen: () => void
 }) {
   return (
-    <button type="button" onClick={onOpen} className="digest-item w-full text-left" style={{ padding: '14px 12px' }}>
-      <p className="font-medium leading-snug" style={{ margin: '0 0 4px', fontSize: 16 }}>
+    <button
+      type="button"
+      onClick={onOpen}
+      className="digest-item w-full text-left"
+      style={{ padding: '16px 12px' }}
+    >
+      <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 6px' }}>
+        {whenLabel(release.release_date, today)}
+      </p>
+      <p className="font-medium leading-snug" style={{ margin: '0 0 4px', fontSize: 17 }}>
         {release.title}
       </p>
       <p style={{ fontSize: 13, color: 'var(--muted)', margin: 0 }}>
         {kindLabel(release.kind)}
-        <span style={{ margin: '0 6px', opacity: 0.5 }}>·</span>
-        {whenLabel(release.release_date, today)}
+        {release.notes ? (
+          <>
+            <span style={{ margin: '0 6px', opacity: 0.5 }}>·</span>
+            {release.notes}
+          </>
+        ) : null}
       </p>
-      {release.notes && (
-        <p className="line-clamp-2" style={{ fontSize: 13, color: 'var(--muted)', margin: '6px 0 0' }}>
-          {release.notes}
-        </p>
-      )}
     </button>
   )
 }
@@ -307,7 +256,7 @@ function SectionLabel({ children }: { children: ReactNode }) {
         letterSpacing: '0.09em',
         textTransform: 'uppercase',
         color: 'var(--muted)',
-        margin: '0 0 8px',
+        margin: '0 0 4px',
         padding: '0 12px',
       }}
     >
@@ -316,13 +265,22 @@ function SectionLabel({ children }: { children: ReactNode }) {
   )
 }
 
-function isCurrentMonth(year: number, month: number, today: string): boolean {
-  return today.startsWith(`${year}-${String(month + 1).padStart(2, '0')}`)
-}
-
-function todayInMonth(year: number, month: number, today: string): string {
-  if (isCurrentMonth(year, month, today)) return today
-  return `${year}-${String(month + 1).padStart(2, '0')}-01`
+function groupByMonth(items: Release[]): { key: string; label: string; items: Release[] }[] {
+  const groups: { key: string; label: string; items: Release[] }[] = []
+  for (const item of items) {
+    const key = item.release_date.slice(0, 7)
+    const last = groups[groups.length - 1]
+    if (last && last.key === key) {
+      last.items.push(item)
+      continue
+    }
+    const label = new Date(item.release_date + 'T12:00:00').toLocaleDateString('en-US', {
+      month: 'long',
+      year: 'numeric',
+    })
+    groups.push({ key, label, items: [item] })
+  }
+  return groups
 }
 
 function addDays(dateStr: string, days: number): string {
@@ -331,35 +289,18 @@ function addDays(dateStr: string, days: number): string {
   return todayDateStr(d)
 }
 
-function formatLong(dateStr: string): string {
-  return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-  })
-}
-
 function whenLabel(dateStr: string, today: string): string {
   const date = new Date(dateStr + 'T12:00:00')
+  const weekday = date.toLocaleDateString('en-US', { weekday: 'short' })
   const formatted = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-  if (dateStr === today) return `Today · ${formatted}`
+
+  if (dateStr === today) return `Today · ${weekday}, ${formatted}`
   const tomorrow = addDays(today, 1)
-  if (dateStr === tomorrow) return `Tomorrow · ${formatted}`
-  if (dateStr < today) return formatted
+  if (dateStr === tomorrow) return `Tomorrow · ${weekday}, ${formatted}`
 
   const diff = Math.round((date.getTime() - new Date(today + 'T12:00:00').getTime()) / 86400000)
-  if (diff < 14) return `In ${diff} days · ${formatted}`
-  return formatted
-}
-
-const navBtn: React.CSSProperties = {
-  background: 'none',
-  border: 'none',
-  color: 'var(--foreground)',
-  cursor: 'pointer',
-  fontSize: 18,
-  lineHeight: 1,
-  padding: '4px 0',
+  if (diff > 0 && diff < 14) return `In ${diff} days · ${weekday}, ${formatted}`
+  return `${weekday}, ${formatted}`
 }
 
 const addBtn: React.CSSProperties = {
