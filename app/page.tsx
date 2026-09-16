@@ -42,7 +42,7 @@ export default function Home() {
   }, [])
 
   return (
-    <div className="h-dvh overflow-hidden" style={{ background: 'var(--background)' }}>
+    <div className="app-shell">
       <aside
         className="hidden md:flex flex-col"
         style={{
@@ -50,7 +50,7 @@ export default function Home() {
           top: 0,
           left: 0,
           width: 220,
-          height: '100dvh',
+          height: '100%',
           padding: '48px var(--gutter)',
           overflowY: 'auto',
           zIndex: 10,
@@ -83,13 +83,13 @@ export default function Home() {
         <header
           className="flex-shrink-0"
           style={{
-            paddingTop: 'env(safe-area-inset-top)',
+            paddingTop: 'max(12px, env(safe-area-inset-top, 0px))',
             paddingLeft: 'var(--gutter)',
             paddingRight: 'var(--gutter)',
             paddingBottom: 28,
           }}
         >
-          <span className="brand" style={{ display: 'block', paddingTop: 28 }}>
+          <span className="brand" style={{ display: 'block', paddingTop: 16 }}>
             Office Hours
           </span>
         </header>
@@ -121,7 +121,10 @@ export default function Home() {
             </button>
           ))}
         </nav>
-        <main className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
+        <main
+          className="flex-1 min-h-0 overflow-y-auto overscroll-contain"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
           {renderContent()}
         </main>
       </div>

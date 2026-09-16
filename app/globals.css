@@ -27,15 +27,15 @@
   box-sizing: border-box;
 }
 
-html,
-body {
+html {
   height: 100%;
-  height: 100dvh;
-  overflow: hidden;
-  overscroll-behavior: none;
 }
 
 body {
+  min-height: 100%;
+  min-height: -webkit-fill-available;
+  overflow: hidden;
+  overscroll-behavior: none;
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
@@ -43,6 +43,17 @@ body {
   font-weight: 400;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+/* iOS home-screen / standalone: fill the real visual viewport */
+.app-shell {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  height: -webkit-fill-available;
+  overflow: hidden;
+  background: var(--background);
 }
 
 button,
@@ -56,7 +67,7 @@ textarea {
   max-width: var(--column);
   margin-left: auto;
   margin-right: auto;
-  padding: calc(var(--space) * 5) var(--gutter) calc(56px + env(safe-area-inset-bottom, 0px));
+  padding: calc(var(--space) * 5) var(--gutter) calc(48px + env(safe-area-inset-bottom, 0px));
 }
 
 .brand {
