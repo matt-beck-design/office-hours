@@ -795,7 +795,7 @@ export default function AdminPage() {
             {/* Feed refresh */}
             <ControlCard
               title="Refresh feeds"
-              description="Pulls the latest items from all RSS, Bluesky, and YouTube sources into the live dashboard. Also runs hourly via cron."
+              description="Pulls the latest items from all RSS, Bluesky, and YouTube sources into the live dashboard. Also runs once daily via cron."
               action="ingest"
               label="Refresh now"
               ctrlStatus={ctrlStatus}

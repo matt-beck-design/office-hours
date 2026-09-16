@@ -8,7 +8,7 @@ A personal content dashboard PWA. Pulls RSS, Bluesky, and YouTube into live topi
 - Tailwind CSS
 - Supabase (Postgres)
 - Web Push (VAPID) for optional notifications
-- Deployed on Vercel with an hourly ingest cron
+- Deployed on Vercel with a daily ingest cron
 
 ---
 
@@ -52,7 +52,7 @@ npm run dev
 ### 5. Pull content
 
 ```bash
-# Hourly ingest (also available as "Refresh feeds" in admin)
+# Daily ingest (also available as "Refresh feeds" in admin)
 curl -X POST http://localhost:3000/api/cron/daily \
   -H "Authorization: Bearer your_cron_secret"
 ```
@@ -65,7 +65,9 @@ curl -X POST http://localhost:3000/api/cron/daily \
 2. Import to Vercel
 3. Add all env vars in Vercel → Settings → Environment Variables
 4. Deploy — cron is configured in `vercel.json`:
-   - Feed ingest: `0 * * * *` (hourly)
+   - Feed ingest: `0 13 * * *` (daily ~6am PDT / 13:00 UTC)
+
+> Vercel Hobby only allows one cron run per day. Use admin **Refresh feeds** for a manual pull anytime; upgrade to Pro for sub-daily schedules.
 
 ---
 
