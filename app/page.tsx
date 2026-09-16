@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react'
 import ContentStream, { ContentTab } from '@/components/ContentStream'
 import Overview from '@/components/Overview'
 import ReleaseCalendar from '@/components/ReleaseCalendar'
-import PushManager from '@/components/PushManager'
+import Settings from '@/components/Settings'
 import { FeedItemRow, Video } from '@/components/content-cards'
 import { Release } from '@/lib/releases'
 
-type HomeTab = 'overview' | ContentTab | 'releases'
+type HomeTab = 'overview' | ContentTab | 'releases' | 'settings'
 
 const TABS: { id: HomeTab; label: string }[] = [
   { id: 'overview', label: 'Overview' },
@@ -16,6 +16,7 @@ const TABS: { id: HomeTab; label: string }[] = [
   { id: 'posts', label: 'Posts' },
   { id: 'videos', label: 'Videos' },
   { id: 'releases', label: 'Releases' },
+  { id: 'settings', label: 'Settings' },
 ]
 
 export default function Home() {
@@ -76,14 +77,11 @@ export default function Home() {
             </button>
           ))}
         </nav>
-        <div style={{ marginTop: 48 }}>
-          <PushManager />
-        </div>
       </aside>
 
       <div className="flex flex-col h-full min-h-0 md:hidden">
         <header
-          className="flex items-end justify-between flex-shrink-0"
+          className="flex-shrink-0"
           style={{
             paddingTop: 'env(safe-area-inset-top)',
             paddingLeft: 'var(--gutter)',
@@ -91,12 +89,9 @@ export default function Home() {
             paddingBottom: 28,
           }}
         >
-          <span className="brand" style={{ paddingTop: 28 }}>
+          <span className="brand" style={{ display: 'block', paddingTop: 28 }}>
             Office Hours
           </span>
-          <div style={{ paddingBottom: 4 }}>
-            <PushManager />
-          </div>
         </header>
         <nav
           className="flex overflow-x-auto flex-shrink-0"
@@ -141,7 +136,7 @@ export default function Home() {
   )
 
   function renderContent() {
-    if (loading) {
+    if (loading && activeTab !== 'settings') {
       return (
         <div className="page-column">
           <div className="cluster" style={{ gap: 16 }}>
@@ -173,6 +168,8 @@ export default function Home() {
         return <ContentStream tab={activeTab} items={items} videos={videos} />
       case 'releases':
         return <ReleaseCalendar />
+      case 'settings':
+        return <Settings />
       default: {
         const _exhaustive: never = activeTab
         return _exhaustive

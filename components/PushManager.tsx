@@ -68,21 +68,40 @@ export default function PushManager() {
     setState('unsubscribed')
   }
 
-  if (state === 'unsupported' || state === 'denied') return null
-  if (state === 'loading') return null
+  if (state === 'loading') {
+    return <p className="type-body" style={{ margin: 0 }}>Checking…</p>
+  }
+
+  if (state === 'unsupported') {
+    return (
+      <p className="type-body" style={{ margin: 0 }}>
+        Notifications aren&apos;t supported in this browser.
+      </p>
+    )
+  }
+
+  if (state === 'denied') {
+    return (
+      <p className="type-body" style={{ margin: 0 }}>
+        Notifications are blocked. Allow them in browser settings to enable.
+      </p>
+    )
+  }
 
   return (
     <button
       onClick={state === 'subscribed' ? unsubscribe : subscribe}
-      className="type-meta"
+      className="type-body"
       style={{
         background: 'none',
         border: 'none',
         cursor: 'pointer',
         padding: 0,
+        color: 'var(--foreground)',
+        textAlign: 'left',
       }}
     >
-      {state === 'subscribed' ? 'Notifications on' : 'Enable notifications'}
+      {state === 'subscribed' ? 'On — tap to turn off' : 'Off — tap to turn on'}
     </button>
   )
 }
