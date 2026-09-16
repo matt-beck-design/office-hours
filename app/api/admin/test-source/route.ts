@@ -20,6 +20,11 @@ export async function POST(req: Request) {
   return NextResponse.json({
     ok: true,
     count: items.length,
-    preview: items.slice(0, 3).map((i) => ({ title: i.title, published: i.published, url: i.url })),
+    preview: items.slice(0, 3).map((i) => ({
+      title: i.title,
+      published: i.published,
+      url: i.url,
+      imageUrl: i.imageUrl,
+    })),
   })
 }

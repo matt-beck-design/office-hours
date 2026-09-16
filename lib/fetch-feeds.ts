@@ -1,5 +1,7 @@
 import Parser from 'rss-parser'
 
+type AttrMap = Record<string, string | undefined>
+
 type RssItem = {
   guid?: string
   link?: string
@@ -10,8 +12,9 @@ type RssItem = {
   isoDate?: string
   pubDate?: string
   enclosure?: { url?: string; type?: string }
-  mediaContent?: Array<{ $?: { url?: string; type?: string; medium?: string } }>
-  mediaThumbnail?: Array<{ $?: { url?: string } }>
+  mediaContent?: unknown
+  mediaThumbnail?: unknown
+  mediaGroup?: unknown
 }
 
 const rssParser = new Parser({
@@ -20,6 +23,7 @@ const rssParser = new Parser({
     item: [
       ['media:content', 'mediaContent', { keepArray: true }],
       ['media:thumbnail', 'mediaThumbnail', { keepArray: true }],
+      ['media:group', 'mediaGroup', { keepArray: true }],
       ['content:encoded', 'content:encoded'],
     ],
   },
@@ -35,8 +39,6 @@ export interface FeedItem {
   source: string
   sourceType: 'rss' | 'bluesky'
 }
-
-// ── RSS ──────────────────────────────────────────────────────────────────────
 
 export async function fetchRss(name: string, url: string): Promise<FeedItem[]> {
   try {
@@ -61,44 +63,88 @@ export async function fetchRss(name: string, url: string): Promise<FeedItem[]> {
 
 function extractRssImage(item: RssItem): string | null {
   const enclosure = item.enclosure
-  if (enclosure?.url && isImageUrl(enclosure.url, enclosure.type)) {
+  if (enclosure?.url && isLikelyImage(enclosure.url, enclosure.type)) {
     return absoluteUrl(enclosure.url)
   }
 
-  for (const media of item.mediaContent ?? []) {
-    const url = media.$?.url
-    if (url && isImageUrl(url, media.$?.type) && media.$?.medium !== 'video') {
+  for (const node of asArray(item.mediaThumbnail)) {
+    const url = attr(node, 'url')
+    if (url) return absoluteUrl(url)
+  }
+
+  for (const node of asArray(item.mediaContent)) {
+    const url = attr(node, 'url')
+    const medium = attr(node, 'medium')
+    const type = attr(node, 'type')
+    if (url && medium !== 'video' && isLikelyImage(url, type, medium)) {
       return absoluteUrl(url)
     }
   }
 
-  for (const thumb of item.mediaThumbnail ?? []) {
-    if (thumb.$?.url) return absoluteUrl(thumb.$.url)
+  for (const group of asArray(item.mediaGroup)) {
+    if (!group || typeof group !== 'object') continue
+    const g = group as Record<string, unknown>
+    for (const node of asArray(g['media:thumbnail'] ?? g.mediaThumbnail)) {
+      const url = attr(node, 'url')
+      if (url) return absoluteUrl(url)
+    }
+    for (const node of asArray(g['media:content'] ?? g.mediaContent)) {
+      const url = attr(node, 'url')
+      const medium = attr(node, 'medium')
+      const type = attr(node, 'type')
+      if (url && medium !== 'video' && isLikelyImage(url, type, medium)) {
+        return absoluteUrl(url)
+      }
+    }
   }
 
   const html = item['content:encoded'] ?? item.content ?? ''
   const match = html.match(/<img[^>]+src=["']([^"']+)["']/i)
-  if (match?.[1]) return absoluteUrl(match[1])
+  if (match?.[1]) return absoluteUrl(decodeXml(match[1]))
 
   return null
 }
 
-function isImageUrl(url: string, type?: string): boolean {
+function asArray(value: unknown): unknown[] {
+  if (value == null) return []
+  return Array.isArray(value) ? value : [value]
+}
+
+function attr(node: unknown, key: string): string | undefined {
+  if (!node) return undefined
+  if (typeof node === 'string') return key === 'url' ? node : undefined
+  if (typeof node !== 'object') return undefined
+  const obj = node as { $?: AttrMap } & AttrMap
+  return obj.$?.[key] ?? obj[key]
+}
+
+function isLikelyImage(url: string, type?: string, medium?: string): boolean {
+  if (medium === 'image') return true
   if (type?.startsWith('image/')) return true
-  return /\.(jpe?g|png|gif|webp|avif)(\?|$)/i.test(url)
+  if (/\.(jpe?g|png|gif|webp|avif)(\?|#|$)/i.test(url)) return true
+  // CDN paths often omit extensions (BBC ichef, etc.)
+  if (/\/(image|images|img|photos?|media|thumb|thumbnail|cpsprodpb)\b/i.test(url)) return true
+  return false
+}
+
+function decodeXml(value: string): string {
+  return value
+    .replace(/&amp;/g, '&')
+    .replace(/&#038;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
 }
 
 function absoluteUrl(url: string): string | null {
   try {
-    const parsed = new URL(url)
+    const parsed = new URL(decodeXml(url.trim()))
     if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null
     return parsed.toString()
   } catch {
     return null
   }
 }
-
-// ── Bluesky ──────────────────────────────────────────────────────────────────
 
 const BSKY_API = 'https://public.api.bsky.app/xrpc'
 
@@ -161,8 +207,6 @@ function bskyPostUrl(handle: string, uri: string): string {
   const rkey = uri.split('/').pop()
   return `https://bsky.app/profile/${handle}/post/${rkey}`
 }
-
-// ── YouTube ───────────────────────────────────────────────────────────────────
 
 export interface VideoItem {
   channelId: string
