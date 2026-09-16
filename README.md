@@ -91,7 +91,7 @@ Push notifications require the app to be installed to the home screen on iOS.
 - Sources are organized into **topic groups** in admin (for managing feeds)
 - The home screen opens on **Overview**, then type tabs: Articles, Posts, Videos, Releases
 - A daily cron (or admin "Refresh feeds") fetches RSS + Bluesky into `feed_items` and YouTube into `videos`
-- Articles open in the in-app reader; posts and videos open externally
+- Articles open in the in-app reader; videos open externally
 - Track games, movies, shows, and other drop dates on the Releases tab (add/edit requires the admin password)
 
 ---

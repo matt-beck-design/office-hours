@@ -5,14 +5,12 @@ import ReaderSheet from './ReaderSheet'
 import {
   ArticleCard,
   FeedItemRow,
-  PostCard,
   Video,
   VideoCard,
   isArticle,
-  isPost,
 } from './content-cards'
 
-export type ContentTab = 'articles' | 'posts' | 'videos'
+export type ContentTab = 'articles' | 'videos'
 export type { FeedItemRow, Video }
 
 interface Props {
@@ -41,10 +39,10 @@ export default function ContentStream({ tab, items, videos }: Props) {
   }
 
   const filtered = items
-    .filter((item) => (tab === 'posts' ? isPost(item) : isArticle(item)))
+    .filter(isArticle)
     .sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime())
 
-  if (filtered.length === 0) return <EmptyState label={tab} />
+  if (filtered.length === 0) return <EmptyState label="articles" />
 
   return (
     <>
@@ -58,17 +56,13 @@ export default function ContentStream({ tab, items, videos }: Props) {
 
       <div className="page-column">
         <div className="row-stack">
-          {filtered.map((item) =>
-            tab === 'posts' ? (
-              <PostCard key={item.id} item={item} />
-            ) : (
-              <ArticleCard
-                key={item.id}
-                item={item}
-                onOpen={() => item.url && setReader({ url: item.url, title: item.title })}
-              />
-            ),
-          )}
+          {filtered.map((item) => (
+            <ArticleCard
+              key={item.id}
+              item={item}
+              onOpen={() => item.url && setReader({ url: item.url, title: item.title })}
+            />
+          ))}
         </div>
       </div>
     </>

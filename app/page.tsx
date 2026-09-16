@@ -13,7 +13,6 @@ type HomeTab = 'overview' | ContentTab | 'releases' | 'settings'
 const TABS: { id: HomeTab; label: string }[] = [
   { id: 'overview', label: 'Overview' },
   { id: 'articles', label: 'Articles' },
-  { id: 'posts', label: 'Posts' },
   { id: 'videos', label: 'Videos' },
   { id: 'releases', label: 'Releases' },
   { id: 'settings', label: 'Settings' },
@@ -166,7 +165,6 @@ export default function Home() {
           />
         )
       case 'articles':
-      case 'posts':
       case 'videos':
         return <ContentStream tab={activeTab} items={items} videos={videos} />
       case 'releases':

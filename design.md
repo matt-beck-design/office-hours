@@ -22,7 +22,7 @@ Do not invent accent colors. Hierarchy is color + spacing + face, not fills.
 ## Typography
 
 1. **Two faces only.**
-   - **Serif** (`--font-serif`, Newsreader): a text face — brand, titles, body copy, posts, reader. Not a condensed display serif.
+   - **Serif** (`--font-serif`, Newsreader): a text face — brand, titles, body copy, reader. Not a condensed display serif.
    - **Sans** (`--font-sans`, Inter): nav, meta, filters, utility chrome only.
 2. **Sentence case** for app chrome and labels. No all-caps microcopy.
 3. **Display serifs are banned for UI body.** Never use condensed/display faces (e.g. Instrument Serif) for titles or copy.
