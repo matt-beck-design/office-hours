@@ -21,7 +21,7 @@ Create a project at [supabase.com](https://supabase.com), then run `supabase/sch
 If you already have an older schema, run the files in `supabase/migrations/` in order:
 1. `001_feed_items.sql` — live feed items
 2. `002_source_type.sql` — content-type tags
-3. `003_releases.sql` — release calendar
+3. `003_releases.sql` — release feed
 
 ### 2. Environment variables
 
@@ -87,7 +87,7 @@ Push notifications require the app to be installed to the home screen on iOS.
 ## How it works
 
 - Sources are organized into **topic groups** in admin (for managing feeds)
-- The home screen groups content by **type**: Articles (RSS), Posts (Bluesky), Videos (YouTube), plus a **Releases** calendar
+- The home screen groups content by **type**: Articles (RSS), Posts (Bluesky), Videos (YouTube), plus a **Releases** feed
 - A daily cron (or admin "Refresh feeds") fetches RSS + Bluesky into `feed_items` and YouTube into `videos`
 - Articles open in the in-app reader; posts and videos open externally
 - Track games, movies, shows, and other drop dates on the Releases tab (add/edit requires the admin password)
@@ -109,7 +109,7 @@ app/
   admin/                    — source management + refresh controls
   api/items/                — serve feed items
   api/videos/               — serve videos
-  api/releases/             — release calendar CRUD
+  api/releases/             — release feed CRUD
   api/cron/daily/           — daily ingest cron
 components/
   ContentStream.tsx         — content-type streams

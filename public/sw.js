@@ -1,8 +1,8 @@
-const CACHE = 'office-hours-v4'
-const API_CACHE = 'office-hours-api-v4'
+const CACHE = 'office-hours-v5'
+const API_CACHE = 'office-hours-api-v5'
 
 const SHELL = ['/', '/manifest.json']
-const API_ROUTES = ['/api/items', '/api/groups', '/api/videos', '/api/releases']
+const API_ROUTES = ['/api/items', '/api/videos', '/api/releases']
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

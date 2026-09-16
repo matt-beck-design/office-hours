@@ -19,7 +19,6 @@ interface FeedGroup {
   id: string
   name: string
   topic: string
-  context?: string
   position: number
   feed_sources: FeedSource[]
 }
@@ -83,8 +82,8 @@ export default function AdminPage() {
 
   // Group forms
   const [showNewGroup, setShowNewGroup] = useState(false)
-  const [newGroup, setNewGroup] = useState({ name: '', topic: '', context: '' })
-  const [editingGroup, setEditingGroup] = useState<{ id: string; name: string; topic: string; context: string } | null>(null)
+  const [newGroup, setNewGroup] = useState({ name: '', topic: '' })
+  const [editingGroup, setEditingGroup] = useState<{ id: string; name: string; topic: string } | null>(null)
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set())
 
   function toggleCollapse(id: string) {
@@ -165,7 +164,7 @@ export default function AdminPage() {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(newGroup),
     })
-    setNewGroup({ name: '', topic: '', context: '' })
+    setNewGroup({ name: '', topic: '' })
     setShowNewGroup(false)
     loadData()
   }
@@ -176,7 +175,7 @@ export default function AdminPage() {
     await fetch(`/api/admin/groups/${editingGroup.id}`, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ name: editingGroup.name, topic: editingGroup.topic, context: editingGroup.context }),
+      body: JSON.stringify({ name: editingGroup.name, topic: editingGroup.topic }),
     })
     setEditingGroup(null)
     loadData()
@@ -409,12 +408,6 @@ export default function AdminPage() {
                       style={input}
                       required
                     />
-                    <textarea
-                      value={editingGroup.context}
-                      onChange={(e) => setEditingGroup((g) => g && ({ ...g, context: e.target.value }))}
-                      placeholder="Optional notes for this group"
-                      style={{ ...input, minHeight: 80, resize: 'vertical' }}
-                    />
                     <div style={{ display: 'flex', gap: 8 }}>
                       <button type="submit" style={btn('primary')}>Save</button>
                       <button type="button" onClick={() => setEditingGroup(null)} style={btn()}>Cancel</button>
@@ -436,7 +429,7 @@ export default function AdminPage() {
                     </div>
                     <div style={{ display: 'flex', gap: 6, flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
                       <button
-                        onClick={() => setEditingGroup({ id: group.id, name: group.name, topic: group.topic, context: group.context ?? '' })}
+                        onClick={() => setEditingGroup({ id: group.id, name: group.name, topic: group.topic })}
                         style={btn('ghost')}
                       >
                         Edit
@@ -635,12 +628,6 @@ export default function AdminPage() {
                   onChange={(e) => setNewGroup((g) => ({ ...g, topic: e.target.value }))}
                   style={input}
                   required
-                />
-                <textarea
-                  placeholder="Optional notes for this group"
-                  value={newGroup.context}
-                  onChange={(e) => setNewGroup((g) => ({ ...g, context: e.target.value }))}
-                  style={{ ...input, minHeight: 80, resize: 'vertical' }}
                 />
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button type="submit" style={btn('primary')}>Create group</button>
