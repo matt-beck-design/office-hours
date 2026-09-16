@@ -77,8 +77,11 @@ export default function ReleaseCalendar() {
       )}
 
       <div
-        className="mx-auto pb-[env(safe-area-inset-bottom)]"
-        style={{ maxWidth: 'var(--column)', padding: '32px 24px 48px' }}
+        className="mx-auto"
+        style={{
+          maxWidth: 'var(--column)',
+          padding: '32px 24px calc(48px + env(safe-area-inset-bottom, 0px))',
+        }}
       >
         <div className="flex items-center justify-between mb-8" style={{ gap: 24 }}>
           <div className="flex gap-6 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>

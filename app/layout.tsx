@@ -25,11 +25,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`h-full ${inter.variable}`}>
+    <html lang="en" className={`h-dvh overflow-hidden ${inter.variable}`}>
       <head>
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
       </head>
-      <body className="h-full">
+      <body className="h-dvh overflow-hidden">
         <ServiceWorkerRegistrar />
         {children}
       </body>

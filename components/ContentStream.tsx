@@ -31,8 +31,11 @@ export default function ContentStream({ tab, items, videos }: Props) {
     if (list.length === 0) return <EmptyState label="videos" />
     return (
       <div
-        className="mx-auto pb-[env(safe-area-inset-bottom)]"
-        style={{ maxWidth: 'var(--column)', padding: '32px 24px 48px' }}
+        className="mx-auto"
+        style={{
+          maxWidth: 'var(--column)',
+          padding: '32px 24px calc(48px + env(safe-area-inset-bottom, 0px))',
+        }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
           {list.map((video) => (
@@ -60,8 +63,11 @@ export default function ContentStream({ tab, items, videos }: Props) {
       )}
 
       <div
-        className="mx-auto pb-[env(safe-area-inset-bottom)]"
-        style={{ maxWidth: 'var(--column)', padding: '32px 24px 48px' }}
+        className="mx-auto"
+        style={{
+          maxWidth: 'var(--column)',
+          padding: '32px 24px calc(48px + env(safe-area-inset-bottom, 0px))',
+        }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {filtered.map((item) =>

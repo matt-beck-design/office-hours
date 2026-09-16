@@ -56,8 +56,11 @@ export default function Overview({ items, videos, releases, onSeeAll }: Props) {
       )}
 
       <div
-        className="mx-auto pb-[env(safe-area-inset-bottom)]"
-        style={{ maxWidth: 'var(--column)', padding: '32px 24px 48px' }}
+        className="mx-auto"
+        style={{
+          maxWidth: 'var(--column)',
+          padding: '32px 24px calc(48px + env(safe-area-inset-bottom, 0px))',
+        }}
       >
         {empty ? (
           <p style={{ color: 'var(--muted)', margin: 0 }}>
