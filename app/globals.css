@@ -16,6 +16,13 @@
   --space-section: 72px;
   --gutter: 16px;
   --column: 540px;
+
+  /* Motion — Emil Kowalski vocabulary */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --duration-press: 160ms;
+  --duration-sheet: 250ms;
 }
 
 @media (min-width: 768px) {
@@ -137,6 +144,18 @@ textarea {
 }
 
 /* Content rows — hairline grid, tight related clusters */
+.digest-item,
+.video-item,
+.pressable {
+  transition: transform var(--duration-press) var(--ease-out);
+}
+
+.digest-item:active,
+.video-item:active,
+.pressable:active {
+  transform: scale(0.97);
+}
+
 .digest-item {
   padding: var(--space-row) 0;
   background: none;
@@ -209,13 +228,67 @@ textarea {
   margin: var(--space-tight) 0 0;
 }
 
-.reader-sheet {
+.reader-sheet,
+.overlay-sheet {
   position: fixed;
   inset: 0;
   z-index: 50;
   display: flex;
   flex-direction: column;
   background: var(--background);
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity var(--duration-sheet) var(--ease-out),
+    transform var(--duration-sheet) var(--ease-out);
+}
+
+@starting-style {
+  .reader-sheet,
+  .overlay-sheet {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+.reader-sheet[data-closing],
+.overlay-sheet[data-closing] {
+  opacity: 0;
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .digest-item,
+  .video-item,
+  .pressable {
+    transition: none;
+  }
+
+  .digest-item:active,
+  .video-item:active,
+  .pressable:active {
+    transform: none;
+  }
+
+  .reader-sheet,
+  .overlay-sheet {
+    transition: opacity 200ms ease;
+    transform: none;
+  }
+
+  @starting-style {
+    .reader-sheet,
+    .overlay-sheet {
+      opacity: 0;
+      transform: none;
+    }
+  }
+
+  .reader-sheet[data-closing],
+  .overlay-sheet[data-closing] {
+    opacity: 0;
+    transform: none;
+  }
 }
 
 .reader-sheet-bar {

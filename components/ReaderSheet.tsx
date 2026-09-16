@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, TransitionEvent } from 'react'
 import { createPortal } from 'react-dom'
 
 interface ReaderArticle {
@@ -25,10 +25,17 @@ export default function ReaderSheet({ url, fallbackTitle, onClose }: Props) {
   const [article, setArticle] = useState<ReaderArticle | null>(null)
   const [error, setError] = useState<ReaderError | null>(null)
   const [mounted, setMounted] = useState(false)
+  const [closing, setClosing] = useState(false)
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  useEffect(() => {
+    if (!closing) return
+    const timeout = window.setTimeout(onClose, 320)
+    return () => window.clearTimeout(timeout)
+  }, [closing, onClose])
 
   useEffect(() => {
     setArticle(null)
@@ -44,20 +51,31 @@ export default function ReaderSheet({ url, fallbackTitle, onClose }: Props) {
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') setClosing(true)
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [onClose])
+  }, [])
+
+  function handleTransitionEnd(e: TransitionEvent<HTMLDivElement>) {
+    if (!closing) return
+    if (e.target !== e.currentTarget) return
+    if (e.propertyName !== 'opacity') return
+    onClose()
+  }
 
   if (!mounted) return null
 
   return createPortal(
-    <div className="reader-sheet">
+    <div
+      className="reader-sheet"
+      data-closing={closing ? '' : undefined}
+      onTransitionEnd={handleTransitionEnd}
+    >
       <header className="reader-sheet-bar">
         <button
-          onClick={onClose}
-          className="type-nav"
+          onClick={() => setClosing(true)}
+          className="type-nav pressable"
           style={{
             background: 'none',
             border: 'none',
