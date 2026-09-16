@@ -73,7 +73,7 @@ function EmptyState({ label }: { label: string }) {
   return (
     <div className="page-column">
       <p className="type-body" style={{ margin: 0 }}>
-        No {label} yet. Run a feed refresh from admin to pull content.
+        No {label} yet. Add sources in admin.
       </p>
     </div>
   )

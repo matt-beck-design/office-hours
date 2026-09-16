@@ -51,7 +51,7 @@ export default function Overview({ items, videos, releases, onSeeAll }: Props) {
       <div className="page-column">
         {empty ? (
           <p className="type-body" style={{ margin: 0 }}>
-            Nothing here yet. Refresh feeds in admin or add a release.
+            Nothing here yet. Add RSS or YouTube sources in admin.
           </p>
         ) : (
           <div className="section-stack">

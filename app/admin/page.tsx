@@ -780,7 +780,7 @@ export default function AdminPage() {
             {/* Feed refresh */}
             <ControlCard
               title="Refresh feeds"
-              description="Pulls the latest items from all RSS, Bluesky, and YouTube sources into the live dashboard. Also runs once daily via cron."
+              description="Optional. The dashboard fetches RSS and YouTube live (cached ~5 minutes). Use this only to warm the database cache."
               action="ingest"
               label="Refresh now"
               ctrlStatus={ctrlStatus}
