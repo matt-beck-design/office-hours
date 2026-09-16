@@ -22,12 +22,12 @@ Do not invent accent colors. Hierarchy is color + spacing + face, not fills.
 ## Typography
 
 1. **Two faces only.**
-   - **Serif** (`--font-serif`, Newsreader): a text face — brand, titles, body copy, posts, reader. Not a condensed display serif.
+   - **Serif** (`--font-serif`, Newsreader): brand, content titles, body copy, reader. Not a condensed display serif.
    - **Sans** (`--font-sans`, Inter): nav, meta, filters, utility chrome only.
 2. **Sentence case** for app chrome and labels. No all-caps microcopy.
-3. **Display serifs are banned for UI body.** Never use condensed/display faces (e.g. Instrument Serif) for titles or copy.
-4. **Few sizes.** One sans size for chrome/meta; serif titles larger than serif body. Slight size lift for brand is OK.
-5. Hierarchy comes from **size**, **color** (foreground vs muted), and **spacing** — not from bold weights or letter-spacing tricks.
+3. **Display serifs are banned.** Never use condensed/display faces (e.g. Instrument Serif).
+4. **One size for content.** Titles and body share the same serif size. Brand may be a slight lift only. Do not enlarge list titles, video titles, or calendar titles.
+5. Hierarchy comes from **color** (foreground vs muted), **face** (serif vs sans), and **spacing** — never from weight or oversized title scale.
 
 ## Layout & rhythm
 

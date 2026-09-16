@@ -26,14 +26,10 @@ export interface Video {
   group_id?: string
 }
 
-export function isPost(item: FeedItemRow): boolean {
-  if (item.source_type === 'bluesky') return true
-  if (item.source_type === 'rss') return false
-  return item.url.includes('bsky.app')
-}
-
 export function isArticle(item: FeedItemRow): boolean {
-  return !isPost(item)
+  if (item.source_type === 'bluesky') return false
+  if (item.source_type === 'rss') return true
+  return !item.url.includes('bsky.app')
 }
 
 export function ArticleCard({ item, onOpen }: { item: FeedItemRow; onOpen: () => void }) {
@@ -51,29 +47,6 @@ export function ArticleCard({ item, onOpen }: { item: FeedItemRow; onOpen: () =>
         {item.source_name} {relativeDate(item.published_at)}
       </p>
     </button>
-  )
-}
-
-export function PostCard({ item }: { item: FeedItemRow }) {
-  const body = item.summary || item.title
-  return (
-    <a href={item.url} target="_blank" rel="noopener noreferrer" className="block digest-item">
-      {item.image_url && (
-        <div className="article-thumb">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={item.image_url} alt="" loading="lazy" decoding="async" />
-        </div>
-      )}
-      <p
-        className="type-body"
-        style={{ color: 'var(--foreground)', whiteSpace: 'pre-wrap', margin: 0 }}
-      >
-        {body}
-      </p>
-      <p className="type-meta">
-        {item.source_name} {relativeDate(item.published_at)}
-      </p>
-    </a>
   )
 }
 

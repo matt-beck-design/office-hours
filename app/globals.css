@@ -27,15 +27,15 @@
   box-sizing: border-box;
 }
 
-html,
-body {
+html {
   height: 100%;
-  height: 100dvh;
-  overflow: hidden;
-  overscroll-behavior: none;
 }
 
 body {
+  min-height: 100%;
+  min-height: -webkit-fill-available;
+  overflow: hidden;
+  overscroll-behavior: none;
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
@@ -43,6 +43,17 @@ body {
   font-weight: 400;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+/* iOS home-screen / standalone: fill the real visual viewport */
+.app-shell {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  height: -webkit-fill-available;
+  overflow: hidden;
+  background: var(--background);
 }
 
 button,
@@ -56,24 +67,24 @@ textarea {
   max-width: var(--column);
   margin-left: auto;
   margin-right: auto;
-  padding: calc(var(--space) * 5) var(--gutter) calc(56px + env(safe-area-inset-bottom, 0px));
+  padding: calc(var(--space) * 5) var(--gutter) calc(48px + env(safe-area-inset-bottom, 0px));
 }
 
 .brand {
   font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
-  font-size: 28px;
+  font-size: 18px;
   font-weight: 400;
-  line-height: 1.15;
+  line-height: 1.3;
   letter-spacing: 0;
   color: var(--foreground);
 }
 
-/* Serif for display titles only — never body or small chrome */
+/* Content titles share body size — hierarchy is color + spacing, not scale */
 .type-title {
   font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
-  font-size: 24px;
+  font-size: 16px;
   font-weight: 400;
-  line-height: 1.3;
+  line-height: 1.5;
   letter-spacing: 0;
   color: var(--foreground);
 }
@@ -82,7 +93,7 @@ textarea {
   font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
   font-size: 16px;
   font-weight: 400;
-  line-height: 1.6;
+  line-height: 1.55;
   color: var(--muted);
 }
 
@@ -196,7 +207,7 @@ textarea {
 .reader-content {
   color: var(--muted);
   font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 400;
   line-height: 1.7;
 }
@@ -212,8 +223,8 @@ textarea {
   color: var(--foreground);
   font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
   font-weight: 400;
-  font-size: 24px;
-  line-height: 1.3;
+  font-size: 16px;
+  line-height: 1.5;
   margin: 1.75em 0 0.4em;
 }
 

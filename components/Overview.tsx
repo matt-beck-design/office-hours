@@ -5,15 +5,13 @@ import ReaderSheet from './ReaderSheet'
 import {
   ArticleCard,
   FeedItemRow,
-  PostCard,
   Video,
   VideoCard,
   isArticle,
-  isPost,
 } from './content-cards'
-import { Release, kindLabel, todayDateStr, whenLabel } from '@/lib/releases'
+import { Release, todayDateStr, whenLabel } from '@/lib/releases'
 
-type OverviewTab = 'articles' | 'posts' | 'videos' | 'releases'
+type OverviewTab = 'articles' | 'videos' | 'releases'
 
 interface Props {
   items: FeedItemRow[]
@@ -30,10 +28,6 @@ export default function Overview({ items, videos, releases, onSeeAll }: Props) {
     .filter(isArticle)
     .sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime())
     .slice(0, 4)
-  const posts = items
-    .filter(isPost)
-    .sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime())
-    .slice(0, 3)
   const latestVideos = [...videos]
     .sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime())
     .slice(0, 2)
@@ -42,8 +36,7 @@ export default function Overview({ items, videos, releases, onSeeAll }: Props) {
     .sort((a, b) => a.release_date.localeCompare(b.release_date) || a.title.localeCompare(b.title))
     .slice(0, 5)
 
-  const empty =
-    upcoming.length === 0 && articles.length === 0 && posts.length === 0 && latestVideos.length === 0
+  const empty = upcoming.length === 0 && articles.length === 0 && latestVideos.length === 0
 
   return (
     <>
@@ -79,7 +72,6 @@ export default function Overview({ items, videos, releases, onSeeAll }: Props) {
                       <p className="type-title" style={{ marginTop: 'var(--space-tight)' }}>
                         {release.title}
                       </p>
-                      <p className="type-meta">{kindLabel(release.kind)}</p>
                     </button>
                   ))}
                 </div>
@@ -96,17 +88,6 @@ export default function Overview({ items, videos, releases, onSeeAll }: Props) {
                       item={item}
                       onOpen={() => item.url && setReader({ url: item.url, title: item.title })}
                     />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {posts.length > 0 && (
-              <section>
-                <SectionHeader title="Posts" onSeeAll={() => onSeeAll('posts')} />
-                <div className="row-stack">
-                  {posts.map((item) => (
-                    <PostCard key={item.id} item={item} />
                   ))}
                 </div>
               </section>
