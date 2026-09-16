@@ -51,7 +51,10 @@ export function PostCard({ item }: { item: FeedItemRow }) {
   const body = item.summary || item.title
   return (
     <a href={item.url} target="_blank" rel="noopener noreferrer" className="block digest-item">
-      <p className="type-title" style={{ whiteSpace: 'pre-wrap', fontSize: 18, lineHeight: 1.4 }}>
+      <p
+        className="type-body"
+        style={{ color: 'var(--foreground)', whiteSpace: 'pre-wrap', margin: 0 }}
+      >
         {body}
       </p>
       <p className="type-meta">
