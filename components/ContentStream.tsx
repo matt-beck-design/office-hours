@@ -46,8 +46,11 @@ export default function ContentStream({ tab, items, videos }: Props) {
       return <EmptyState label="videos" />
     }
     return (
-      <div className="mx-auto pb-[env(safe-area-inset-bottom)]" style={{ maxWidth: '576px', paddingTop: '24px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      <div
+        className="mx-auto pb-[env(safe-area-inset-bottom)]"
+        style={{ maxWidth: '576px', paddingTop: '16px', paddingLeft: '16px', paddingRight: '16px' }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           {list.map((video) => (
             <VideoCard key={video.id} video={video} />
           ))}
@@ -176,23 +179,20 @@ function VideoCard({ video }: { video: Video }) {
       href={video.video_url}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex gap-4 video-item"
+      className="block video-item"
     >
       {video.thumbnail_url && (
-        <div
-          className="flex-shrink-0 rounded-sm overflow-hidden relative"
-          style={{ width: 160, height: 90 }}
-        >
+        <div className="video-thumb relative w-full overflow-hidden">
           <Image
             src={video.thumbnail_url}
             alt={video.title}
             fill
-            sizes="160px"
+            sizes="(max-width: 576px) 100vw, 576px"
             className="object-cover"
           />
         </div>
       )}
-      <div className="flex-1 min-w-0">
+      <div className="video-meta">
         <p
           className="font-medium leading-snug line-clamp-2"
           style={{
