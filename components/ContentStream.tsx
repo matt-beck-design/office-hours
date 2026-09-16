@@ -30,14 +30,8 @@ export default function ContentStream({ tab, items, videos }: Props) {
     )
     if (list.length === 0) return <EmptyState label="videos" />
     return (
-      <div
-        className="mx-auto"
-        style={{
-          maxWidth: 'var(--column)',
-          padding: '32px 24px calc(48px + env(safe-area-inset-bottom, 0px))',
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+      <div className="page-column">
+        <div className="cluster" style={{ gap: 48 }}>
           {list.map((video) => (
             <VideoCard key={video.id} video={video} />
           ))}
@@ -62,14 +56,8 @@ export default function ContentStream({ tab, items, videos }: Props) {
         />
       )}
 
-      <div
-        className="mx-auto"
-        style={{
-          maxWidth: 'var(--column)',
-          padding: '32px 24px calc(48px + env(safe-area-inset-bottom, 0px))',
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div className="page-column">
+        <div className="row-stack">
           {filtered.map((item) =>
             tab === 'posts' ? (
               <PostCard key={item.id} item={item} />
@@ -89,8 +77,8 @@ export default function ContentStream({ tab, items, videos }: Props) {
 
 function EmptyState({ label }: { label: string }) {
   return (
-    <div className="px-6 py-16 mx-auto text-left" style={{ maxWidth: 'var(--column)' }}>
-      <p style={{ color: 'var(--muted)', margin: 0 }}>
+    <div className="page-column">
+      <p className="type-body" style={{ margin: 0 }}>
         No {label} yet. Run a feed refresh from admin to pull content.
       </p>
     </div>

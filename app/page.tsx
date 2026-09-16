@@ -48,20 +48,22 @@ export default function Home() {
           position: 'fixed',
           top: 0,
           left: 0,
-          width: 200,
+          width: 220,
           height: '100dvh',
-          padding: '40px 24px',
+          padding: '48px var(--gutter)',
           overflowY: 'auto',
           zIndex: 10,
         }}
       >
-        <p style={{ color: 'var(--muted)', margin: '0 0 40px' }}>Office Hours</p>
-        <nav className="flex flex-col flex-1" style={{ gap: 20 }}>
+        <p className="brand" style={{ margin: '0 0 48px' }}>
+          Office Hours
+        </p>
+        <nav className="flex flex-col flex-1" style={{ gap: 28 }}>
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className="text-left"
+              className="type-nav text-left"
               style={{
                 background: 'none',
                 border: 'none',
@@ -74,28 +76,43 @@ export default function Home() {
             </button>
           ))}
         </nav>
-        <div style={{ marginTop: 40 }}>
+        <div style={{ marginTop: 48 }}>
           <PushManager />
         </div>
       </aside>
 
       <div className="flex flex-col h-full min-h-0 md:hidden">
         <header
-          className="flex items-center justify-between px-6 pt-[env(safe-area-inset-top)] flex-shrink-0"
-          style={{ paddingBottom: 0 }}
+          className="flex items-end justify-between flex-shrink-0"
+          style={{
+            paddingTop: 'env(safe-area-inset-top)',
+            paddingLeft: 'var(--gutter)',
+            paddingRight: 'var(--gutter)',
+            paddingBottom: 28,
+          }}
         >
-          <span style={{ color: 'var(--muted)', padding: '20px 0' }}>Office Hours</span>
-          <PushManager />
+          <span className="brand" style={{ paddingTop: 28 }}>
+            Office Hours
+          </span>
+          <div style={{ paddingBottom: 4 }}>
+            <PushManager />
+          </div>
         </header>
         <nav
-          className="flex px-6 overflow-x-auto flex-shrink-0"
-          style={{ gap: 24, scrollbarWidth: 'none', paddingBottom: 20 }}
+          className="flex overflow-x-auto flex-shrink-0"
+          style={{
+            gap: 28,
+            scrollbarWidth: 'none',
+            paddingLeft: 'var(--gutter)',
+            paddingRight: 'var(--gutter)',
+            paddingBottom: 36,
+          }}
         >
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className="flex-shrink-0"
+              className="type-nav flex-shrink-0"
               style={{
                 color: activeTab === tab.id ? 'var(--foreground)' : 'var(--muted)',
                 background: 'none',
@@ -114,15 +131,20 @@ export default function Home() {
         </main>
       </div>
 
-      <main className="hidden md:block h-full min-h-0 overflow-y-auto">{renderContent()}</main>
+      <main
+        className="hidden md:block h-full min-h-0 overflow-y-auto"
+        style={{ marginLeft: 220 }}
+      >
+        {renderContent()}
+      </main>
     </div>
   )
 
   function renderContent() {
     if (loading) {
       return (
-        <div className="px-6 py-10 mx-auto" style={{ maxWidth: 'var(--column)' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className="page-column">
+          <div className="cluster" style={{ gap: 16 }}>
             {[...Array(6)].map((_, i) => (
               <div
                 key={i}

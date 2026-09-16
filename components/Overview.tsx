@@ -55,23 +55,17 @@ export default function Overview({ items, videos, releases, onSeeAll }: Props) {
         />
       )}
 
-      <div
-        className="mx-auto"
-        style={{
-          maxWidth: 'var(--column)',
-          padding: '32px 24px calc(48px + env(safe-area-inset-bottom, 0px))',
-        }}
-      >
+      <div className="page-column">
         {empty ? (
-          <p style={{ color: 'var(--muted)', margin: 0 }}>
+          <p className="type-body" style={{ margin: 0 }}>
             Nothing here yet. Refresh feeds in admin or add a release.
           </p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 64 }}>
+          <div className="section-stack">
             {upcoming.length > 0 && (
               <section>
                 <SectionHeader title="Coming up" onSeeAll={() => onSeeAll('releases')} />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div className="row-stack">
                   {upcoming.map((release) => (
                     <button
                       key={release.id}
@@ -79,11 +73,13 @@ export default function Overview({ items, videos, releases, onSeeAll }: Props) {
                       onClick={() => onSeeAll('releases')}
                       className="digest-item w-full text-left"
                     >
-                      <p style={{ color: 'var(--muted)', margin: '0 0 8px' }}>
+                      <p className="type-meta" style={{ margin: 0 }}>
                         {whenLabel(release.release_date, today)}
                       </p>
-                      <p style={{ color: 'var(--foreground)', margin: '0 0 8px' }}>{release.title}</p>
-                      <p style={{ color: 'var(--muted)', margin: 0 }}>{kindLabel(release.kind)}</p>
+                      <p className="type-title" style={{ marginTop: 'var(--space-tight)' }}>
+                        {release.title}
+                      </p>
+                      <p className="type-meta">{kindLabel(release.kind)}</p>
                     </button>
                   ))}
                 </div>
@@ -93,7 +89,7 @@ export default function Overview({ items, videos, releases, onSeeAll }: Props) {
             {articles.length > 0 && (
               <section>
                 <SectionHeader title="Articles" onSeeAll={() => onSeeAll('articles')} />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div className="row-stack">
                   {articles.map((item) => (
                     <ArticleCard
                       key={item.id}
@@ -108,7 +104,7 @@ export default function Overview({ items, videos, releases, onSeeAll }: Props) {
             {posts.length > 0 && (
               <section>
                 <SectionHeader title="Posts" onSeeAll={() => onSeeAll('posts')} />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div className="row-stack">
                   {posts.map((item) => (
                     <PostCard key={item.id} item={item} />
                   ))}
@@ -119,7 +115,7 @@ export default function Overview({ items, videos, releases, onSeeAll }: Props) {
             {latestVideos.length > 0 && (
               <section>
                 <SectionHeader title="Videos" onSeeAll={() => onSeeAll('videos')} />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+                <div className="cluster" style={{ gap: 40 }}>
                   {latestVideos.map((video) => (
                     <VideoCard key={video.id} video={video} />
                   ))}
@@ -136,13 +132,16 @@ export default function Overview({ items, videos, releases, onSeeAll }: Props) {
 function SectionHeader({ title, onSeeAll }: { title: string; onSeeAll: () => void }) {
   return (
     <div
-      className="flex items-center justify-between"
-      style={{ marginBottom: 16 }}
+      className="flex items-baseline justify-between"
+      style={{ marginBottom: 28, gap: 24 }}
     >
-      <p style={{ color: 'var(--muted)', margin: 0 }}>{title}</p>
+      <p className="type-meta" style={{ margin: 0, color: 'var(--muted)' }}>
+        {title}
+      </p>
       <button
         type="button"
         onClick={onSeeAll}
+        className="type-meta"
         style={{
           background: 'none',
           border: 'none',
