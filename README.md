@@ -1,15 +1,14 @@
 # Office Hours
 
-A personal news PWA. Consolidates RSS and Bluesky feeds into a daily AI digest, with a separate YouTube video feed. Lives on your iPhone home screen.
+A personal content dashboard PWA. Pulls RSS, Bluesky, and YouTube into live topic streams you can browse and read in-app. Lives on your iPhone home screen.
 
 ## Stack
 
-- Next.js 14 App Router + TypeScript
+- Next.js 16 App Router + TypeScript
 - Tailwind CSS
 - Supabase (Postgres)
-- Anthropic Claude (`claude-sonnet-4-20250514`) for digest generation and breaking news filtering
-- Web Push (VAPID) for push notifications
-- Deployed on Vercel with two cron jobs
+- Web Push (VAPID) for optional notifications
+- Deployed on Vercel with an hourly ingest cron
 
 ---
 
@@ -19,36 +18,30 @@ A personal news PWA. Consolidates RSS and Bluesky feeds into a daily AI digest, 
 
 Create a project at [supabase.com](https://supabase.com), then run `supabase/schema.sql` in the SQL editor.
 
-### 2. Environment variables
+If you already have an older schema, run `supabase/migrations/001_feed_items.sql` instead to add the live `feed_items` table and related columns.
 
-Copy `.env.example` to `.env.local` and fill in:
+### 2. Environment variables
 
 | Variable | Where to find it |
 |---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Settings → API → Project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → Settings → API → anon public key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Settings → API → service_role secret key |
-| `ANTHROPIC_API_KEY` | [console.anthropic.com](https://console.anthropic.com) |
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | See below |
 | `VAPID_PRIVATE_KEY` | See below |
 | `VAPID_EMAIL` | Any email (`mailto:you@example.com`) |
 | `CRON_SECRET` | Any long random string (e.g. `openssl rand -hex 32`) |
+| `ADMIN_SECRET` | Password for `/admin` |
+| `YOUTUBE_API_KEY` | Optional — needed for YouTube channels |
 
 **Generating VAPID keys:**
 ```bash
 npx web-push generate-vapid-keys
 ```
-Placeholder keys are pre-filled in `.env.local` — replace with real ones before deploying to production.
 
 ### 3. Add your sources
 
-Edit `sources.config.js`. The shape is documented inline. Add YouTube channels like:
-```js
-youtube: [
-  { name: 'Channel Name', channelId: 'UCxxxxxxxxxxxxxxxxxxxxxxxx' },
-]
-```
-YouTube channel IDs can be found in the channel URL or via the YouTube Data API.
+Edit `sources.config.js`, or manage groups/sources in `/admin` after seeding.
 
 ### 4. Run locally
 
@@ -56,15 +49,11 @@ YouTube channel IDs can be found in the channel URL or via the YouTube Data API.
 npm run dev
 ```
 
-### 5. Test the crons manually
+### 5. Pull content
 
 ```bash
-# Daily digest
+# Hourly ingest (also available as "Refresh feeds" in admin)
 curl -X POST http://localhost:3000/api/cron/daily \
-  -H "Authorization: Bearer your_cron_secret"
-
-# Breaking news check
-curl -X POST http://localhost:3000/api/cron/breaking \
   -H "Authorization: Bearer your_cron_secret"
 ```
 
@@ -75,11 +64,8 @@ curl -X POST http://localhost:3000/api/cron/breaking \
 1. Push to a GitHub repo
 2. Import to Vercel
 3. Add all env vars in Vercel → Settings → Environment Variables
-4. Deploy — cron jobs are configured in `vercel.json`:
-   - Daily digest: `0 15 * * *` (7am PT / 15:00 UTC)
-   - Breaking news: `0 * * * *` (every hour)
-
-> Vercel crons require a Pro plan or above for sub-hourly schedules. The hourly breaking news cron is within the free Hobby plan limit.
+4. Deploy — cron is configured in `vercel.json`:
+   - Feed ingest: `0 * * * *` (hourly)
 
 ---
 
@@ -93,29 +79,32 @@ Push notifications require the app to be installed to the home screen on iOS.
 
 ---
 
+## How it works
+
+- Sources are organized into **topic groups** (sidebar / tabs)
+- An hourly cron (or admin "Refresh feeds") fetches RSS + Bluesky into `feed_items` and YouTube into `videos`
+- The home screen shows a **live chronological stream** per group — articles open in the in-app reader; videos open on YouTube
+
+---
+
 ## File overview
 
 ```
-sources.config.js        — all feed and YouTube channel config
-supabase/schema.sql      — database tables
+sources.config.js           — seed config for feeds / YouTube
+supabase/schema.sql         — database tables
+supabase/migrations/        — incremental migrations for existing DBs
 lib/
-  supabase.ts            — Supabase client (browser + admin)
-  push.ts                — Web Push helpers (server-only)
-  fetch-feeds.ts         — RSS + Bluesky + YouTube fetchers
+  run-ingest.ts             — fetch + upsert feed items and videos
+  fetch-feeds.ts            — RSS + Bluesky + YouTube fetchers
+  get-sources.ts            — load sources from DB (fallback: config)
 app/
-  page.tsx               — two-tab shell
-  api/cron/daily/        — daily digest cron
-  api/cron/breaking/     — hourly breaking news cron
-  api/digest/            — serve latest digest
-  api/videos/            — serve videos
-  api/push/              — subscribe/unsubscribe push
+  page.tsx                  — group tabs + live streams
+  admin/                    — source management + refresh controls
+  api/items/                — serve feed items
+  api/videos/               — serve videos
+  api/cron/daily/           — hourly ingest cron
 components/
-  DigestView.tsx         — digest reader
-  VideosView.tsx         — video feed
-  PushManager.tsx        — notification subscribe button
-  ServiceWorkerRegistrar — registers sw.js
-public/
-  sw.js                  — service worker (offline + push)
-  manifest.json          — PWA manifest
-vercel.json              — cron schedules
+  GroupView.tsx             — mixed article + video stream
+  ReaderSheet.tsx           — in-app article reader
+  PushManager.tsx           — notification subscribe button
 ```

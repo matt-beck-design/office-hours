@@ -81,10 +81,6 @@ export default function AdminPage() {
   const [youtube, setYoutube] = useState<YouTubeChannel[]>([])
   const [dataLoading, setDataLoading] = useState(false)
 
-  // Bio
-  const [bio, setBio] = useState('')
-  const [bioSaving, setBioSaving] = useState(false)
-
   // Group forms
   const [showNewGroup, setShowNewGroup] = useState(false)
   const [newGroup, setNewGroup] = useState({ name: '', topic: '', context: '' })
@@ -149,31 +145,18 @@ export default function AdminPage() {
 
   const loadData = useCallback(async () => {
     setDataLoading(true)
-    const [gRes, yRes, bioRes] = await Promise.all([
+    const [gRes, yRes] = await Promise.all([
       fetch('/api/admin/groups').then((r) => r.json()),
       fetch('/api/admin/youtube').then((r) => r.json()),
-      fetch('/api/admin/settings?key=user_bio').then((r) => r.json()),
     ])
     setGroups(gRes.groups ?? [])
     setYoutube(yRes.channels ?? [])
-    setBio(bioRes.value ?? '')
     setDataLoading(false)
   }, [])
 
   useEffect(() => { if (authed) loadData() }, [authed, loadData])
 
   // ── Groups ──────────────────────────────────────────────────────────────────
-
-  async function saveBio(e: React.FormEvent) {
-    e.preventDefault()
-    setBioSaving(true)
-    await fetch('/api/admin/settings', {
-      method: 'PUT',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ key: 'user_bio', value: bio }),
-    })
-    setBioSaving(false)
-  }
 
   async function createGroup(e: React.FormEvent) {
     e.preventDefault()
@@ -322,7 +305,7 @@ export default function AdminPage() {
 
   // ── Controls ────────────────────────────────────────────────────────────────
 
-  async function runAction(action: 'seed' | 'daily' | 'breaking') {
+  async function runAction(action: 'seed' | 'ingest') {
     setCtrlStatus({ action, state: 'running', message: '' })
     const url = action === 'seed' ? '/api/admin/seed' : `/api/admin/trigger/${action}`
     try {
@@ -422,14 +405,14 @@ export default function AdminPage() {
                     <input
                       value={editingGroup.topic}
                       onChange={(e) => setEditingGroup((g) => g && ({ ...g, topic: e.target.value }))}
-                      placeholder="Topic hint (passed to Claude)"
+                      placeholder="Topic (e.g. gaming industry news)"
                       style={input}
                       required
                     />
                     <textarea
                       value={editingGroup.context}
                       onChange={(e) => setEditingGroup((g) => g && ({ ...g, context: e.target.value }))}
-                      placeholder="What should Claude focus on for this group? Interests, preferences, things to skip…"
+                      placeholder="Optional notes for this group"
                       style={{ ...input, minHeight: 80, resize: 'vertical' }}
                     />
                     <div style={{ display: 'flex', gap: 8 }}>
@@ -647,14 +630,14 @@ export default function AdminPage() {
                   required
                 />
                 <input
-                  placeholder="Topic hint (passed to Claude as context)"
+                  placeholder="Topic (e.g. gaming industry news)"
                   value={newGroup.topic}
                   onChange={(e) => setNewGroup((g) => ({ ...g, topic: e.target.value }))}
                   style={input}
                   required
                 />
                 <textarea
-                  placeholder="What should Claude focus on for this group? Interests, preferences, things to skip…"
+                  placeholder="Optional notes for this group"
                   value={newGroup.context}
                   onChange={(e) => setNewGroup((g) => ({ ...g, context: e.target.value }))}
                   style={{ ...input, minHeight: 80, resize: 'vertical' }}
@@ -799,29 +782,6 @@ export default function AdminPage() {
         {tab === 'controls' && (
           <div style={{ display: 'grid', gap: 20 }}>
 
-            {/* Bio */}
-            <div style={{ border: '1px solid var(--border)', borderRadius: 8, padding: '16px' }}>
-              <p style={{ fontWeight: 600, fontSize: 14, margin: '0 0 4px' }}>About you</p>
-              <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 14px' }}>
-                Tell Claude who you are — your interests, what you care about, what to skip. This shapes the personal note at the top of each feed group.
-              </p>
-              <form onSubmit={saveBio} style={{ display: 'grid', gap: 10 }}>
-                <textarea
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  placeholder="e.g. I'm a product designer in LA. I follow gaming closely — single-player, RPGs, Xbox strategy. I also read broadly: design, tech, politics. Skip anything sports, mobile, or esports."
-                  style={{ ...input, minHeight: 100, resize: 'vertical' }}
-                />
-                <button
-                  type="submit"
-                  disabled={bioSaving}
-                  style={btn('primary', { justifySelf: 'start', opacity: bioSaving ? 0.6 : 1 })}
-                >
-                  {bioSaving ? 'Saving…' : 'Save'}
-                </button>
-              </form>
-            </div>
-
             {/* Seed */}
             <ControlCard
               title="Import from sources.config.js"
@@ -832,22 +792,12 @@ export default function AdminPage() {
               onRun={runAction}
             />
 
-            {/* Daily digest */}
+            {/* Feed refresh */}
             <ControlCard
-              title="Run daily digest"
-              description="Fetches all feeds, generates a digest via Claude, stores it, and sends a push notification."
-              action="daily"
-              label="Run now"
-              ctrlStatus={ctrlStatus}
-              onRun={runAction}
-            />
-
-            {/* Breaking news */}
-            <ControlCard
-              title="Run breaking news check"
-              description="Polls breaking-tier sources, asks Claude to evaluate newsworthiness, fires a push only if something clears the bar."
-              action="breaking"
-              label="Run now"
+              title="Refresh feeds"
+              description="Pulls the latest items from all RSS, Bluesky, and YouTube sources into the live dashboard. Also runs hourly via cron."
+              action="ingest"
+              label="Refresh now"
               ctrlStatus={ctrlStatus}
               onRun={runAction}
             />
@@ -870,10 +820,10 @@ function ControlCard({
 }: {
   title: string
   description: string
-  action: 'seed' | 'daily' | 'breaking'
+  action: 'seed' | 'ingest'
   label: string
   ctrlStatus: { action: string; state: string; message: string }
-  onRun: (a: 'seed' | 'daily' | 'breaking') => void
+  onRun: (a: 'seed' | 'ingest') => void
 }) {
   const active = ctrlStatus.action === action
   const running = active && ctrlStatus.state === 'running'

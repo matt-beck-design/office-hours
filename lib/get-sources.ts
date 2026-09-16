@@ -9,6 +9,7 @@ export interface SourceConfig {
 }
 
 export interface FeedGroupConfig {
+  id?: string
   name: string
   topic: string
   breaking: SourceConfig[]
@@ -47,6 +48,7 @@ export async function getSources(): Promise<SourcesConfig> {
         enabled: boolean
       }>
       return {
+        id: g.id as string,
         name: g.name,
         topic: g.topic,
         breaking: sources

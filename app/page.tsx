@@ -1,38 +1,17 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import GroupView from '@/components/GroupView'
+import GroupView, { FeedItemRow, Video } from '@/components/GroupView'
+import PushManager from '@/components/PushManager'
 
 interface Group {
   id: string
   name: string
 }
 
-interface DigestSection {
-  heading: string
-  items: { title: string; summary: string; url: string; source?: string }[]
-}
-
-interface Digest {
-  id: string
-  date: string
-  content: { sections?: DigestSection[]; raw?: string }
-}
-
-interface Video {
-  id: string
-  channel_id: string
-  channel_name: string
-  title: string
-  thumbnail_url: string
-  video_url: string
-  published_at: string
-  group_id?: string
-}
-
 export default function Home() {
   const [groups, setGroups] = useState<Group[]>([])
-  const [digests, setDigests] = useState<Digest[]>([])
+  const [items, setItems] = useState<FeedItemRow[]>([])
   const [videos, setVideos] = useState<Video[]>([])
   const [activeTab, setActiveTab] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -40,23 +19,24 @@ export default function Home() {
   useEffect(() => {
     Promise.all([
       fetch('/api/groups').then((r) => r.json()),
-      fetch('/api/digest').then((r) => r.json()),
+      fetch('/api/items?limit=300').then((r) => r.json()),
       fetch('/api/videos').then((r) => r.json()),
-    ]).then(([gData, dData, vData]) => {
-      const fetchedGroups: Group[] = gData.groups ?? []
-      setGroups(fetchedGroups)
-      setDigests(dData.digests ?? [])
-      setVideos(vData.videos ?? [])
-      setActiveTab(fetchedGroups[0]?.id ?? null)
-      setLoading(false)
-    }).catch(() => setLoading(false))
+    ])
+      .then(([gData, iData, vData]) => {
+        const fetchedGroups: Group[] = gData.groups ?? []
+        setGroups(fetchedGroups)
+        setItems(iData.items ?? [])
+        setVideos(vData.videos ?? [])
+        setActiveTab(fetchedGroups[0]?.id ?? null)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
   }, [])
 
   const activeGroup = groups.find((g) => g.id === activeTab) ?? null
 
   return (
     <div className="h-full" style={{ background: 'var(--background)' }}>
-
       {/* ── Sidebar (desktop, fixed) ─────────────────────────────────────── */}
       <aside
         className="hidden md:flex flex-col"
@@ -74,7 +54,7 @@ export default function Home() {
         <p className="text-sm font-medium tracking-wide mb-6 px-2" style={{ color: 'var(--muted)' }}>
           Office Hours
         </p>
-        <nav className="flex flex-col gap-0.5">
+        <nav className="flex flex-col gap-0.5 flex-1">
           {groups.map((g) => (
             <button
               key={g.id}
@@ -91,17 +71,21 @@ export default function Home() {
             </button>
           ))}
         </nav>
+        <div className="px-2 mt-4">
+          <PushManager />
+        </div>
       </aside>
 
       {/* ── Mobile layout ───────────────────────────────────────────────── */}
       <div className="flex flex-col h-full md:hidden">
         <header
-          className="flex items-center px-5 pt-[env(safe-area-inset-top)] pb-0 flex-shrink-0"
+          className="flex items-center justify-between px-5 pt-[env(safe-area-inset-top)] pb-0 flex-shrink-0"
           style={{ borderBottom: '1px solid var(--border)' }}
         >
           <span className="text-sm font-medium py-4 tracking-wide" style={{ color: 'var(--muted)' }}>
             Office Hours
           </span>
+          <PushManager />
         </header>
         <nav
           className="flex px-5 overflow-x-auto flex-shrink-0"
@@ -114,7 +98,8 @@ export default function Home() {
               className="py-3 px-1 mr-5 text-sm font-medium transition-colors flex-shrink-0"
               style={{
                 color: activeTab === g.id ? 'var(--foreground)' : 'var(--muted)',
-                borderBottom: activeTab === g.id ? '2px solid var(--foreground)' : '2px solid transparent',
+                borderBottom:
+                  activeTab === g.id ? '2px solid var(--foreground)' : '2px solid transparent',
                 marginBottom: '-1px',
                 background: 'none',
                 cursor: 'pointer',
@@ -128,11 +113,8 @@ export default function Home() {
         <main className="flex-1 overflow-y-auto">{renderContent()}</main>
       </div>
 
-      {/* ── Desktop main (full viewport width, centered) ─────────────────── */}
-      <main className="hidden md:block h-full overflow-y-auto">
-        {renderContent()}
-      </main>
-
+      {/* ── Desktop main ─────────────────────────────────────────────────── */}
+      <main className="hidden md:block h-full overflow-y-auto">{renderContent()}</main>
     </div>
   )
 
@@ -158,7 +140,7 @@ export default function Home() {
           key={activeGroup.id}
           groupId={activeGroup.id}
           groupName={activeGroup.name}
-          digests={digests}
+          items={items}
           videos={videos}
         />
       )
