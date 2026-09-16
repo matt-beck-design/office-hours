@@ -1,13 +1,13 @@
 import type { Metadata, Viewport } from 'next'
-import { Instrument_Serif, Inter } from 'next/font/google'
+import { Inter, Newsreader } from 'next/font/google'
 import './globals.css'
 import ServiceWorkerRegistrar from '@/components/ServiceWorkerRegistrar'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
-const instrument = Instrument_Serif({
-  weight: '400',
+const newsreader = Newsreader({
   subsets: ['latin'],
   variable: '--font-serif',
+  weight: ['400', '500'],
 })
 
 export const metadata: Metadata = {
@@ -30,7 +30,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`h-dvh overflow-hidden ${inter.variable} ${instrument.variable}`}>
+    <html lang="en" className={`h-dvh overflow-hidden ${inter.variable} ${newsreader.variable}`}>
       <head>
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
       </head>
