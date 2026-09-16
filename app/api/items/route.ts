@@ -1,26 +1,30 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getLiveItems, LIVE_REVALIDATE_SECONDS } from '@/lib/live-feeds'
+
+export const revalidate = 300
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const groupId = searchParams.get('group_id')
   const limit = Math.min(Number(searchParams.get('limit') ?? 100) || 100, 300)
 
-  const db = supabaseAdmin()
-  let query = db
-    .from('feed_items')
-    .select('id, external_id, group_id, source_name, source_type, title, url, summary, image_url, published_at')
-    .order('published_at', { ascending: false })
-    .limit(limit)
+  try {
+    let items = await getLiveItems()
+    if (groupId) {
+      items = items.filter((item) => item.group_id === groupId)
+    }
+    items = items.slice(0, limit)
 
-  if (groupId) {
-    query = query.eq('group_id', groupId)
+    return NextResponse.json(
+      { items },
+      {
+        headers: {
+          'Cache-Control': `public, s-maxage=${LIVE_REVALIDATE_SECONDS}, stale-while-revalidate=${LIVE_REVALIDATE_SECONDS * 2}`,
+        },
+      },
+    )
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to load feeds'
+    return NextResponse.json({ error: message, items: [] }, { status: 500 })
   }
-
-  const { data, error } = await query
-  if (error) {
-    return NextResponse.json({ error: error.message, items: [] }, { status: 500 })
-  }
-
-  return NextResponse.json({ items: data ?? [] })
 }

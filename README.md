@@ -54,13 +54,11 @@ Edit `sources.config.js`, or manage groups/sources in `/admin` after seeding.
 npm run dev
 ```
 
-### 5. Pull content
+### 5. Content loads live
 
-```bash
-# Daily ingest (also available as "Refresh feeds" in admin)
-curl -X POST http://localhost:3000/api/cron/daily \
-  -H "Authorization: Bearer your_cron_secret"
-```
+Open the app — Articles and Videos fetch directly from your sources (cached about 5 minutes). Releases still use Supabase.
+
+Optional: admin **Refresh feeds** still warms the DB cache; it is no longer required to see new content.
 
 ---
 
@@ -69,10 +67,9 @@ curl -X POST http://localhost:3000/api/cron/daily \
 1. Push to a GitHub repo
 2. Import to Vercel
 3. Add all env vars in Vercel → Settings → Environment Variables
-4. Deploy — cron is configured in `vercel.json`:
-   - Feed ingest: `0 13 * * *` (daily ~6am PDT / 13:00 UTC)
+4. Deploy
 
-> Vercel Hobby only allows one cron run per day. Use admin **Refresh feeds** for a manual pull anytime; upgrade to Pro for sub-daily schedules.
+No cron is required for the dashboard. Vercel Hobby’s once-daily cron limit no longer affects feed freshness.
 
 ---
 
@@ -80,7 +77,7 @@ curl -X POST http://localhost:3000/api/cron/daily \
 
 1. Open the deployed URL in Safari on iPhone
 2. Tap Share → Add to Home Screen
-3. Enable notifications when prompted
+3. Enable notifications from **Settings** if you want them
 
 Push notifications require the app to be installed to the home screen on iOS.
 
@@ -88,9 +85,10 @@ Push notifications require the app to be installed to the home screen on iOS.
 
 ## How it works
 
-- Sources are organized into **topic groups** in admin (for managing feeds)
-- The home screen opens on **Overview**, then type tabs: Articles, Posts, Videos, Releases
-- A daily cron (or admin "Refresh feeds") fetches RSS + Bluesky into `feed_items` and YouTube into `videos`
+- Sources are organized into **topic groups** in admin (or `sources.config.js`)
+- The home screen opens on **Overview**, then Articles, Videos, Releases, Settings
+- **Articles and Videos load live** from RSS / YouTube on request (~5 min server cache)
+- Supabase stores **releases**, **push subscriptions**, and optional admin source config
 - Articles open in the in-app reader; videos open externally
 - Track games, movies, shows, and other drop dates on the Releases tab (add/edit requires the admin password)
 
@@ -100,23 +98,24 @@ Push notifications require the app to be installed to the home screen on iOS.
 
 ```
 sources.config.js           — seed config for feeds / YouTube
-supabase/schema.sql         — database tables
+supabase/schema.sql         — database tables (releases, sources, push)
 supabase/migrations/        — incremental migrations for existing DBs
 lib/
-  run-ingest.ts             — fetch + upsert feed items and videos
+  live-feeds.ts             — on-demand RSS + YouTube aggregation
+  run-ingest.ts             — optional DB cache warm
   fetch-feeds.ts            — RSS + Bluesky + YouTube fetchers
   get-sources.ts            — load sources from DB (fallback: config)
 app/
   page.tsx                  — Overview + type tabs
-  admin/                    — source management + refresh controls
-  api/items/                — serve feed items
-  api/videos/               — serve videos
+  admin/                    — source management
+  api/items/                — live feed items
+  api/videos/               — live videos
   api/releases/             — release feed CRUD
-  api/cron/daily/           — daily ingest cron
+  api/cron/daily/           — optional ingest (manual / leftover)
 components/
-  Overview.tsx              — all-types dashboard
-  ContentStream.tsx         — content-type streams
+  Overview.tsx              — dashboard
+  ContentStream.tsx         — articles / videos streams
   ReleaseCalendar.tsx       — upcoming release feed
   ReaderSheet.tsx           — in-app article reader
-  PushManager.tsx           — notification subscribe button
+  Settings.tsx              — notifications
 ```

@@ -1,5 +1,5 @@
-const CACHE = 'office-hours-v7'
-const API_CACHE = 'office-hours-api-v7'
+const CACHE = 'office-hours-v8'
+const API_CACHE = 'office-hours-api-v8'
 
 const SHELL = ['/', '/manifest.json']
 const API_ROUTES = ['/api/items', '/api/videos', '/api/releases']
