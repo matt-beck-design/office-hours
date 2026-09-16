@@ -8,6 +8,7 @@ import {
   ReleaseKind,
   kindLabel,
   todayDateStr,
+  whenLabel,
 } from '@/lib/releases'
 
 type KindFilter = 'all' | ReleaseKind
@@ -247,26 +248,6 @@ function groupByMonth(items: Release[]): { key: string; label: string; items: Re
     })
   }
   return groups
-}
-
-function addDays(dateStr: string, days: number): string {
-  const d = new Date(dateStr + 'T12:00:00')
-  d.setDate(d.getDate() + days)
-  return todayDateStr(d)
-}
-
-function whenLabel(dateStr: string, today: string): string {
-  const date = new Date(dateStr + 'T12:00:00')
-  const weekday = date.toLocaleDateString('en-US', { weekday: 'short' })
-  const formatted = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-  const stamp = `${weekday}, ${formatted}`
-
-  if (dateStr === today) return `Today · ${stamp}`
-  if (dateStr === addDays(today, 1)) return `Tomorrow · ${stamp}`
-
-  const diff = Math.round((date.getTime() - new Date(today + 'T12:00:00').getTime()) / 86400000)
-  if (diff > 0 && diff < 14) return `In ${diff} days · ${stamp}`
-  return stamp
 }
 
 const addBtn: React.CSSProperties = {

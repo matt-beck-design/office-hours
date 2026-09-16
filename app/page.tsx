@@ -1,13 +1,17 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import ContentStream, { ContentTab, FeedItemRow, Video } from '@/components/ContentStream'
+import ContentStream, { ContentTab } from '@/components/ContentStream'
+import Overview from '@/components/Overview'
 import ReleaseCalendar from '@/components/ReleaseCalendar'
 import PushManager from '@/components/PushManager'
+import { FeedItemRow, Video } from '@/components/content-cards'
+import { Release } from '@/lib/releases'
 
-type HomeTab = ContentTab | 'releases'
+type HomeTab = 'overview' | ContentTab | 'releases'
 
 const TABS: { id: HomeTab; label: string }[] = [
+  { id: 'overview', label: 'Overview' },
   { id: 'articles', label: 'Articles' },
   { id: 'posts', label: 'Posts' },
   { id: 'videos', label: 'Videos' },
@@ -17,17 +21,20 @@ const TABS: { id: HomeTab; label: string }[] = [
 export default function Home() {
   const [items, setItems] = useState<FeedItemRow[]>([])
   const [videos, setVideos] = useState<Video[]>([])
-  const [activeTab, setActiveTab] = useState<HomeTab>('articles')
+  const [releases, setReleases] = useState<Release[]>([])
+  const [activeTab, setActiveTab] = useState<HomeTab>('overview')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     Promise.all([
       fetch('/api/items?limit=300').then((r) => r.json()),
       fetch('/api/videos').then((r) => r.json()),
+      fetch('/api/releases').then((r) => r.json()),
     ])
-      .then(([iData, vData]) => {
+      .then(([iData, vData, rData]) => {
         setItems(iData.items ?? [])
         setVideos(vData.videos ?? [])
+        setReleases(rData.releases ?? [])
         setLoading(false)
       })
       .catch(() => setLoading(false))
@@ -35,7 +42,6 @@ export default function Home() {
 
   return (
     <div className="h-full" style={{ background: 'var(--background)' }}>
-      {/* ── Sidebar (desktop, fixed) ─────────────────────────────────────── */}
       <aside
         className="hidden md:flex flex-col"
         style={{
@@ -74,7 +80,6 @@ export default function Home() {
         </div>
       </aside>
 
-      {/* ── Mobile layout ───────────────────────────────────────────────── */}
       <div className="flex flex-col h-full md:hidden">
         <header
           className="flex items-center justify-between px-5 pt-[env(safe-area-inset-top)] pb-0 flex-shrink-0"
@@ -111,15 +116,11 @@ export default function Home() {
         <main className="flex-1 overflow-y-auto">{renderContent()}</main>
       </div>
 
-      {/* ── Desktop main ─────────────────────────────────────────────────── */}
       <main className="hidden md:block h-full overflow-y-auto">{renderContent()}</main>
     </div>
   )
 
   function renderContent() {
-    if (activeTab === 'releases') {
-      return <ReleaseCalendar />
-    }
     if (loading) {
       return (
         <div className="px-5 py-8 mx-auto" style={{ maxWidth: '576px' }}>
@@ -135,11 +136,27 @@ export default function Home() {
         </div>
       )
     }
-    if (activeTab === 'articles' || activeTab === 'posts' || activeTab === 'videos') {
-      return <ContentStream tab={activeTab} items={items} videos={videos} />
-    }
 
-    const _exhaustive: never = activeTab
-    return _exhaustive
+    switch (activeTab) {
+      case 'overview':
+        return (
+          <Overview
+            items={items}
+            videos={videos}
+            releases={releases}
+            onSeeAll={setActiveTab}
+          />
+        )
+      case 'articles':
+      case 'posts':
+      case 'videos':
+        return <ContentStream tab={activeTab} items={items} videos={videos} />
+      case 'releases':
+        return <ReleaseCalendar />
+      default: {
+        const _exhaustive: never = activeTab
+        return _exhaustive
+      }
+    }
   }
 }
