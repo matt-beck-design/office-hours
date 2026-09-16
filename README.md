@@ -84,7 +84,7 @@ Push notifications require the app to be installed to the home screen on iOS.
 ## How it works
 
 - Sources are organized into **topic groups** (sidebar / tabs)
-- An hourly cron (or admin "Refresh feeds") fetches RSS + Bluesky into `feed_items` and YouTube into `videos`
+- A daily cron (or admin "Refresh feeds") fetches RSS + Bluesky into `feed_items` and YouTube into `videos`
 - The home screen shows a **live chronological stream** per group — articles open in the in-app reader; videos open on YouTube
 
 ---
