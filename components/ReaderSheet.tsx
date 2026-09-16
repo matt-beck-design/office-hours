@@ -139,7 +139,7 @@ export default function ReaderSheet({ url, fallbackTitle, onClose }: Props) {
         {article && (
           <div className="cluster" style={{ gap: 'var(--space-tight)' }}>
             {article.siteName && <p className="type-meta" style={{ margin: 0 }}>{article.siteName}</p>}
-            <h1 className="type-title" style={{ margin: 0, fontSize: 28, lineHeight: 1.2 }}>
+            <h1 className="type-title" style={{ margin: 0 }}>
               {article.title || fallbackTitle}
             </h1>
             {article.byline && (
