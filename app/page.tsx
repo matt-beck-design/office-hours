@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import ContentStream, { ContentTab } from '@/components/ContentStream'
 import Overview from '@/components/Overview'
 import ReleaseCalendar from '@/components/ReleaseCalendar'
 import Settings from '@/components/Settings'
 import { FeedItemRow, Video } from '@/components/content-cards'
 import { Release } from '@/lib/releases'
+import { usePullToRefresh } from '@/lib/use-pull-to-refresh'
 
 type HomeTab = 'overview' | ContentTab | 'releases' | 'settings'
 
@@ -24,6 +25,17 @@ export default function Home() {
   const [releases, setReleases] = useState<Release[]>([])
   const [activeTab, setActiveTab] = useState<HomeTab>('overview')
   const [loading, setLoading] = useState(true)
+  const [refreshKey, setRefreshKey] = useState(0)
+  const scrollRef = useRef<HTMLElement>(null)
+
+  const applyFeeds = useCallback(
+    (iData: { items?: FeedItemRow[] }, vData: { videos?: Video[] }, rData: { releases?: Release[] }) => {
+      setItems(iData.items ?? [])
+      setVideos(vData.videos ?? [])
+      setReleases(rData.releases ?? [])
+    },
+    [],
+  )
 
   useEffect(() => {
     Promise.all([
@@ -32,13 +44,34 @@ export default function Home() {
       fetch('/api/releases').then((r) => r.json()),
     ])
       .then(([iData, vData, rData]) => {
-        setItems(iData.items ?? [])
-        setVideos(vData.videos ?? [])
-        setReleases(rData.releases ?? [])
+        applyFeeds(iData, vData, rData)
         setLoading(false)
       })
       .catch(() => setLoading(false))
-  }, [])
+  }, [applyFeeds])
+
+  const onRefresh = useCallback(async () => {
+    try {
+      const opts: RequestInit = { cache: 'no-store' }
+      const [iData, vData, rData] = await Promise.all([
+        fetch('/api/items?limit=300&fresh=1', opts).then((r) => r.json()),
+        fetch('/api/videos?fresh=1', opts).then((r) => r.json()),
+        fetch('/api/releases?fresh=1', opts).then((r) => r.json()),
+      ])
+      applyFeeds(iData, vData, rData)
+      setRefreshKey((k) => k + 1)
+    } catch {
+      // Keep existing content if the refresh fails.
+    }
+  }, [applyFeeds])
+
+  const { pull, refreshing, threshold } = usePullToRefresh(scrollRef, {
+    onRefresh,
+    disabled: loading || activeTab === 'settings',
+  })
+
+  const indicatorVisible = pull > 8 || refreshing
+  const armed = pull >= threshold || refreshing
 
   return (
     <div className="app-shell">
@@ -121,10 +154,35 @@ export default function Home() {
           ))}
         </nav>
         <main
+          ref={scrollRef}
           className="flex-1 min-h-0 overflow-y-auto overscroll-contain"
           style={{ WebkitOverflowScrolling: 'touch' }}
         >
-          {renderContent()}
+          <div
+            className="pull-refresh-indicator"
+            aria-hidden={!indicatorVisible}
+            style={{
+              height: pull,
+              opacity: indicatorVisible ? Math.min(1, pull / threshold) : 0,
+            }}
+          >
+            <p
+              className="type-meta"
+              style={{
+                margin: 0,
+                color: armed ? 'var(--foreground)' : 'var(--muted)',
+              }}
+            >
+              {refreshing ? 'Updating' : armed ? 'Release' : 'Pull to refresh'}
+            </p>
+          </div>
+          <div
+            style={{
+              transform: pull > 0 ? `translateY(${Math.max(0, pull - threshold) * 0.15}px)` : undefined,
+            }}
+          >
+            {renderContent()}
+          </div>
         </main>
       </div>
 
@@ -168,7 +226,7 @@ export default function Home() {
       case 'videos':
         return <ContentStream tab={activeTab} items={items} videos={videos} />
       case 'releases':
-        return <ReleaseCalendar />
+        return <ReleaseCalendar refreshKey={refreshKey} />
       case 'settings':
         return <Settings />
       default: {

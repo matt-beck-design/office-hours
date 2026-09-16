@@ -1,5 +1,5 @@
-const CACHE = 'office-hours-v8'
-const API_CACHE = 'office-hours-api-v8'
+const CACHE = 'office-hours-v9'
+const API_CACHE = 'office-hours-api-v9'
 
 const SHELL = ['/', '/manifest.json']
 const API_ROUTES = ['/api/items', '/api/videos', '/api/releases']
@@ -26,6 +26,22 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url)
+
+  // Pull-to-refresh: always hit the network, then refresh the warm cache entry.
+  if (API_ROUTES.includes(url.pathname) && url.searchParams.get('fresh') === '1') {
+    event.respondWith(
+      fetch(event.request).then(async (response) => {
+        if (response.ok) {
+          const cache = await caches.open(API_CACHE)
+          const warmUrl = new URL(event.request.url)
+          warmUrl.searchParams.delete('fresh')
+          await cache.put(warmUrl.toString(), response.clone())
+        }
+        return response
+      })
+    )
+    return
+  }
 
   // API routes: stale-while-revalidate — serve cache instantly, update in background
   if (API_ROUTES.includes(url.pathname)) {

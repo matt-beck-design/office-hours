@@ -121,10 +121,22 @@ function toLiveItem(item: FeedItem, groupId: string | null): LiveFeedItem {
 
 export const getLiveItems = unstable_cache(loadLiveItems, ['live-feed-items'], {
   revalidate: LIVE_REVALIDATE_SECONDS,
+  tags: ['live-feed-items'],
 })
 
 export const getLiveVideos = unstable_cache(loadLiveVideos, ['live-feed-videos'], {
   revalidate: LIVE_REVALIDATE_SECONDS,
+  tags: ['live-feed-videos'],
 })
+
+/** Bypass the ~5 minute cache — used by pull-to-refresh. */
+export function getLiveItemsFresh() {
+  return loadLiveItems()
+}
+
+/** Bypass the ~5 minute cache — used by pull-to-refresh. */
+export function getLiveVideosFresh() {
+  return loadLiveVideos()
+}
 
 export { LIVE_REVALIDATE_SECONDS }

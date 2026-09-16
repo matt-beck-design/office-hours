@@ -13,7 +13,12 @@ import {
 
 type KindFilter = 'all' | ReleaseKind
 
-export default function ReleaseCalendar() {
+interface Props {
+  /** Bumps on pull-to-refresh so this tab reloads from the network. */
+  refreshKey?: number
+}
+
+export default function ReleaseCalendar({ refreshKey = 0 }: Props) {
   const [releases, setReleases] = useState<Release[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<KindFilter>('all')
@@ -30,14 +35,15 @@ export default function ReleaseCalendar() {
     .sort((a, b) => b.release_date.localeCompare(a.release_date) || a.title.localeCompare(b.title))
 
   useEffect(() => {
-    fetch('/api/releases')
+    const fresh = refreshKey > 0
+    fetch(`/api/releases${fresh ? '?fresh=1' : ''}`, fresh ? { cache: 'no-store' } : undefined)
       .then((r) => r.json())
       .then((data) => {
         setReleases(data.releases ?? [])
         setLoading(false)
       })
       .catch(() => setLoading(false))
-  }, [])
+  }, [refreshKey])
 
   function upsert(release: Release) {
     setReleases((prev) => [...prev.filter((r) => r.id !== release.id), release])
