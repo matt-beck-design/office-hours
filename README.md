@@ -18,7 +18,10 @@ A personal content dashboard PWA. Pulls RSS, Bluesky, and YouTube into live topi
 
 Create a project at [supabase.com](https://supabase.com), then run `supabase/schema.sql` in the SQL editor.
 
-If you already have an older schema, run `supabase/migrations/001_feed_items.sql` instead to add the live `feed_items` table and related columns.
+If you already have an older schema, run the files in `supabase/migrations/` in order:
+1. `001_feed_items.sql` — live feed items
+2. `002_source_type.sql` — content-type tags
+3. `003_releases.sql` — release calendar
 
 ### 2. Environment variables
 
@@ -84,9 +87,10 @@ Push notifications require the app to be installed to the home screen on iOS.
 ## How it works
 
 - Sources are organized into **topic groups** in admin (for managing feeds)
-- The home screen groups content by **type**: Articles (RSS), Posts (Bluesky), Videos (YouTube)
+- The home screen groups content by **type**: Articles (RSS), Posts (Bluesky), Videos (YouTube), plus a **Releases** calendar
 - A daily cron (or admin "Refresh feeds") fetches RSS + Bluesky into `feed_items` and YouTube into `videos`
 - Articles open in the in-app reader; posts and videos open externally
+- Track games, movies, shows, and other drop dates on the Releases tab (add/edit requires the admin password)
 
 ---
 
@@ -101,13 +105,15 @@ lib/
   fetch-feeds.ts            — RSS + Bluesky + YouTube fetchers
   get-sources.ts            — load sources from DB (fallback: config)
 app/
-  page.tsx                  — Articles / Posts / Videos tabs
+  page.tsx                  — Articles / Posts / Videos / Releases
   admin/                    — source management + refresh controls
   api/items/                — serve feed items
   api/videos/               — serve videos
+  api/releases/             — release calendar CRUD
   api/cron/daily/           — daily ingest cron
 components/
   ContentStream.tsx         — content-type streams
+  ReleaseCalendar.tsx       — month calendar + coming soon
   ReaderSheet.tsx           — in-app article reader
   PushManager.tsx           — notification subscribe button
 ```

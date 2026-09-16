@@ -103,3 +103,16 @@ create index if not exists seen_items_item_id_idx on seen_items (item_id, source
 create index if not exists feed_items_published_at_idx on feed_items (published_at desc);
 create index if not exists feed_items_group_published_idx on feed_items (group_id, published_at desc);
 create index if not exists feed_items_source_type_published_idx on feed_items (source_type, published_at desc);
+
+create table if not exists releases (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  kind text not null check (kind in ('game', 'movie', 'show', 'music', 'other')),
+  release_date date not null,
+  url text,
+  notes text,
+  created_at timestamptz default now()
+);
+
+create index if not exists releases_date_idx on releases (release_date);
+create index if not exists releases_kind_date_idx on releases (kind, release_date);

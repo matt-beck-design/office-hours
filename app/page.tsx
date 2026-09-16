@@ -2,18 +2,22 @@
 
 import { useEffect, useState } from 'react'
 import ContentStream, { ContentTab, FeedItemRow, Video } from '@/components/ContentStream'
+import ReleaseCalendar from '@/components/ReleaseCalendar'
 import PushManager from '@/components/PushManager'
 
-const TABS: { id: ContentTab; label: string }[] = [
+type HomeTab = ContentTab | 'releases'
+
+const TABS: { id: HomeTab; label: string }[] = [
   { id: 'articles', label: 'Articles' },
   { id: 'posts', label: 'Posts' },
   { id: 'videos', label: 'Videos' },
+  { id: 'releases', label: 'Releases' },
 ]
 
 export default function Home() {
   const [items, setItems] = useState<FeedItemRow[]>([])
   const [videos, setVideos] = useState<Video[]>([])
-  const [activeTab, setActiveTab] = useState<ContentTab>('articles')
+  const [activeTab, setActiveTab] = useState<HomeTab>('articles')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -113,6 +117,9 @@ export default function Home() {
   )
 
   function renderContent() {
+    if (activeTab === 'releases') {
+      return <ReleaseCalendar />
+    }
     if (loading) {
       return (
         <div className="px-5 py-8 mx-auto" style={{ maxWidth: '576px' }}>
@@ -128,6 +135,11 @@ export default function Home() {
         </div>
       )
     }
-    return <ContentStream tab={activeTab} items={items} videos={videos} />
+    if (activeTab === 'articles' || activeTab === 'posts' || activeTab === 'videos') {
+      return <ContentStream tab={activeTab} items={items} videos={videos} />
+    }
+
+    const _exhaustive: never = activeTab
+    return _exhaustive
   }
 }
