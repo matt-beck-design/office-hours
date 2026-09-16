@@ -203,6 +203,34 @@ textarea {
   margin: var(--space-tight) 0 0;
 }
 
+.reader-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  background: var(--background);
+}
+
+.reader-sheet-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  padding: 16px var(--gutter);
+  padding-top: max(16px, env(safe-area-inset-top, 0px));
+  border-bottom: 1px solid var(--border);
+  background: var(--background);
+}
+
+.reader-sheet-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
 /* In-app reader — Newsreader for body; same face for headings at title size */
 .reader-content {
   color: var(--muted);
