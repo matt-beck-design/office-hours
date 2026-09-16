@@ -1,7 +1,7 @@
 'use client'
 
 import { FormEvent, useState } from 'react'
-import { Release, RELEASE_KINDS, ReleaseKind, kindLabel } from '@/lib/releases'
+import { Release, RELEASE_KINDS, ReleaseKind, kindLabel, isReleaseKind } from '@/lib/releases'
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
@@ -85,7 +85,12 @@ export default function ReleaseForm({ initial, onClose, onSaved, onDeleted }: Pr
         setError(data.error ?? 'Could not save.')
         return
       }
-      onSaved(data.release as Release)
+      const release = parseRelease(data.release)
+      if (!release) {
+        setError('Unexpected response.')
+        return
+      }
+      onSaved(release)
     } catch {
       setError('Request failed.')
     } finally {
@@ -287,4 +292,22 @@ const labelStyle: React.CSSProperties = {
   textTransform: 'uppercase',
   color: 'var(--muted)',
   marginBottom: 8,
+}
+
+function parseRelease(value: unknown): Release | null {
+  if (!value || typeof value !== 'object') return null
+  const row = value as Record<string, unknown>
+  if (typeof row.id !== 'string') return null
+  if (typeof row.title !== 'string') return null
+  if (!isReleaseKind(row.kind)) return null
+  if (typeof row.release_date !== 'string') return null
+  return {
+    id: row.id,
+    title: row.title,
+    kind: row.kind,
+    release_date: row.release_date,
+    url: typeof row.url === 'string' ? row.url : null,
+    notes: typeof row.notes === 'string' ? row.notes : null,
+    created_at: typeof row.created_at === 'string' ? row.created_at : undefined,
+  }
 }

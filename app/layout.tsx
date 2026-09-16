@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
   title: 'Office Hours',
-  description: 'Your personal news digest',
+  description: 'Your personal content dashboard',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
