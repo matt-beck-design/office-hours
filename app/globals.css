@@ -73,7 +73,7 @@ body {
 }
 
 .video-item {
-  padding: 16px;
+  padding: 0 0 16px;
   border-radius: 12px;
   transition: background 0.15s ease;
 }
@@ -82,12 +82,25 @@ body {
   background: var(--hover-bg);
 }
 
+.video-thumb {
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  background: var(--border);
+}
+
+.video-meta {
+  padding: 12px 4px 0;
+}
+
 @media (min-width: 640px) {
   .digest-item {
     padding: 24px;
   }
   .video-item {
-    padding: 24px;
+    padding: 0 0 20px;
+  }
+  .video-meta {
+    padding: 14px 8px 0;
   }
 }
 
