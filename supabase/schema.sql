@@ -78,6 +78,7 @@ create table if not exists feed_items (
   external_id text not null,
   group_id uuid references feed_groups(id) on delete cascade,
   source_name text not null,
+  source_type text check (source_type is null or source_type in ('rss', 'bluesky')),
   title text not null,
   url text not null,
   summary text,
@@ -101,3 +102,4 @@ create index if not exists videos_group_id_published_idx on videos (group_id, pu
 create index if not exists seen_items_item_id_idx on seen_items (item_id, source);
 create index if not exists feed_items_published_at_idx on feed_items (published_at desc);
 create index if not exists feed_items_group_published_idx on feed_items (group_id, published_at desc);
+create index if not exists feed_items_source_type_published_idx on feed_items (source_type, published_at desc);

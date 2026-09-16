@@ -42,6 +42,7 @@ export async function runIngest(): Promise<IngestResult> {
             external_id: i.id,
             group_id: group.id,
             source_name: i.source,
+            source_type: i.sourceType,
             title: i.title || '(untitled)',
             url: i.url,
             summary: i.summary || null,
