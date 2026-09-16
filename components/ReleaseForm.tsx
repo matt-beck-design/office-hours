@@ -1,6 +1,6 @@
 'use client'
 
-import { FormEvent, useState } from 'react'
+import { FormEvent, TransitionEvent, useEffect, useState } from 'react'
 import { Release, RELEASE_KINDS, ReleaseKind, kindLabel, isReleaseKind } from '@/lib/releases'
 
 const inputStyle: React.CSSProperties = {
@@ -35,6 +35,24 @@ export default function ReleaseForm({ initial, onClose, onSaved, onDeleted }: Pr
   const [needsAuth, setNeedsAuth] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [closing, setClosing] = useState(false)
+
+  function requestClose() {
+    setClosing(true)
+  }
+
+  useEffect(() => {
+    if (!closing) return
+    const timeout = window.setTimeout(onClose, 320)
+    return () => window.clearTimeout(timeout)
+  }, [closing, onClose])
+
+  function handleTransitionEnd(e: TransitionEvent<HTMLDivElement>) {
+    if (!closing) return
+    if (e.target !== e.currentTarget) return
+    if (e.propertyName !== 'opacity') return
+    onClose()
+  }
 
   async function login(): Promise<boolean> {
     const res = await fetch('/api/admin/auth', {
@@ -124,14 +142,9 @@ export default function ReleaseForm({ initial, onClose, onSaved, onDeleted }: Pr
 
   return (
     <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 50,
-        background: 'var(--background)',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
+      className="overlay-sheet"
+      data-closing={closing ? '' : undefined}
+      onTransitionEnd={handleTransitionEnd}
     >
       <header
         className="flex items-center justify-between px-5 pt-[env(safe-area-inset-top)]"
@@ -139,7 +152,8 @@ export default function ReleaseForm({ initial, onClose, onSaved, onDeleted }: Pr
       >
         <button
           type="button"
-          onClick={onClose}
+          onClick={requestClose}
+          className="pressable"
           style={{
             background: 'none',
             border: 'none',
