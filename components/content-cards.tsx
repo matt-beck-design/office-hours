@@ -38,10 +38,7 @@ export function isArticle(item: FeedItemRow): boolean {
 export function ArticleCard({ item, onOpen }: { item: FeedItemRow; onOpen: () => void }) {
   return (
     <button onClick={onOpen} className="block digest-item w-full text-left">
-      <p
-        className="font-medium leading-snug"
-        style={{ marginBottom: '0.35rem', color: 'var(--foreground)', fontSize: '16px' }}
-      >
+      <p className="font-medium leading-snug" style={{ marginBottom: '0.35rem', color: 'var(--foreground)' }}>
         {item.title}
       </p>
       {item.summary && (
@@ -53,9 +50,7 @@ export function ArticleCard({ item, onOpen }: { item: FeedItemRow; onOpen: () =>
         </p>
       )}
       <p style={{ fontSize: '13px', color: 'var(--muted)', margin: 0 }}>
-        {item.source_name}
-        <span style={{ margin: '0 6px', opacity: 0.5 }}>·</span>
-        {relativeDate(item.published_at)}
+        {item.source_name} {relativeDate(item.published_at)}
       </p>
     </button>
   )
@@ -69,7 +64,6 @@ export function PostCard({ item }: { item: FeedItemRow }) {
         style={{
           color: 'var(--foreground)',
           margin: '0 0 0.5rem',
-          fontSize: '16px',
           lineHeight: '24px',
           whiteSpace: 'pre-wrap',
         }}
@@ -77,9 +71,7 @@ export function PostCard({ item }: { item: FeedItemRow }) {
         {body}
       </p>
       <p style={{ fontSize: '13px', color: 'var(--muted)', margin: 0 }}>
-        {item.source_name}
-        <span style={{ margin: '0 6px', opacity: 0.5 }}>·</span>
-        {relativeDate(item.published_at)}
+        {item.source_name} {relativeDate(item.published_at)}
       </p>
     </a>
   )
@@ -100,20 +92,11 @@ export function VideoCard({ video }: { video: Video }) {
         </div>
       )}
       <div className="video-meta">
-        <p
-          className="font-medium leading-snug line-clamp-2"
-          style={{
-            fontSize: '16px',
-            color: 'var(--foreground)',
-            marginBottom: '0.35rem',
-          }}
-        >
+        <p className="font-medium leading-snug line-clamp-2" style={{ color: 'var(--foreground)', marginBottom: '0.35rem' }}>
           {video.title}
         </p>
         <p style={{ fontSize: '13px', color: 'var(--muted)', margin: 0 }}>
-          {video.channel_name}
-          <span style={{ margin: '0 6px', opacity: 0.5 }}>·</span>
-          {relativeDate(video.published_at)}
+          {video.channel_name} {relativeDate(video.published_at)}
         </p>
       </div>
     </a>

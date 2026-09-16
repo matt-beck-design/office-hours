@@ -8,6 +8,7 @@
   --tab-bg: #141210;
   --accent: #F5F5F5;
   --hover-bg: #141211;
+  --radius: 9999px;
 }
 
 @theme inline {
@@ -37,7 +38,7 @@ body {
 /* Content rows */
 .digest-item {
   padding: 16px;
-  border-radius: 12px;
+  border-radius: var(--radius);
   transition: background 0.15s ease;
 }
 
@@ -47,7 +48,7 @@ body {
 
 .video-item {
   padding: 0 0 16px;
-  border-radius: 12px;
+  border-radius: var(--radius);
   transition: background 0.15s ease;
 }
 
@@ -57,7 +58,7 @@ body {
 
 .video-thumb {
   aspect-ratio: 16 / 9;
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: var(--border);
 }
 
@@ -110,7 +111,7 @@ body {
 .reader-content img {
   max-width: 100%;
   height: auto;
-  border-radius: 8px;
+  border-radius: var(--radius);
   margin: 1em 0;
 }
 

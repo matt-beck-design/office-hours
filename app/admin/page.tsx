@@ -42,7 +42,7 @@ const input: React.CSSProperties = {
   background: 'var(--background)',
   color: 'var(--foreground)',
   border: '1px solid var(--border)',
-  borderRadius: '6px',
+  borderRadius: 'var(--radius)',
   outline: 'none',
   minHeight: '44px',
 }
@@ -55,7 +55,7 @@ function btn(
     padding: '8px 14px',
     fontSize: '13px',
     fontWeight: 500,
-    borderRadius: '6px',
+    borderRadius: 'var(--radius)',
     cursor: 'pointer',
     minHeight: '36px',
     border: '1px solid var(--border)',
@@ -389,7 +389,7 @@ export default function AdminPage() {
             {groups.map((group) => (
               <div
                 key={group.id}
-                style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}
+                style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius)', overflow: 'hidden' }}
               >
                 {/* Group header */}
                 {editingGroup?.id === group.id ? (
@@ -448,7 +448,7 @@ export default function AdminPage() {
                       <div key={tier}>
                         {/* Tier label + add button */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--muted)' }}>
+                          <span style={{ fontSize: 13, color: 'var(--muted)' }}>
                             {tier}
                           </span>
                           <button
@@ -512,7 +512,7 @@ export default function AdminPage() {
                               ) : (
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0' }}>
                                   <span style={{ fontSize: 13, flex: '0 0 auto', fontWeight: 500 }}>{src.name}</span>
-                                  <span style={{ fontSize: 11, color: 'var(--muted)', padding: '1px 5px', border: '1px solid var(--border)', borderRadius: 3, flex: '0 0 auto' }}>
+                                  <span style={{ fontSize: 11, color: 'var(--muted)', padding: '1px 5px', border: '1px solid var(--border)', borderRadius: 'var(--radius)', flex: '0 0 auto' }}>
                                     {src.type}
                                   </span>
                                   <span style={{ fontSize: 12, color: 'var(--muted)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -559,7 +559,7 @@ export default function AdminPage() {
                         {addSourceKey === key && (
                           <form
                             onSubmit={(e) => createSource(e, group.id, tier)}
-                            style={{ marginTop: 8, padding: 12, background: 'var(--tab-bg)', borderRadius: 6, display: 'grid', gap: 8 }}
+                            style={{ marginTop: 8, padding: 12, background: 'var(--tab-bg)', borderRadius: 'var(--radius)', display: 'grid', gap: 8 }}
                           >
                             <input
                               placeholder="Name"
@@ -612,7 +612,7 @@ export default function AdminPage() {
             {showNewGroup ? (
               <form
                 onSubmit={createGroup}
-                style={{ border: '1px solid var(--border)', borderRadius: 8, padding: '14px 16px', display: 'grid', gap: 8 }}
+                style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '14px 16px', display: 'grid', gap: 8 }}
               >
                 <p style={{ fontSize: 13, fontWeight: 600, margin: 0 }}>New feed group</p>
                 <input
@@ -649,7 +649,7 @@ export default function AdminPage() {
               <p style={{ fontSize: 13, color: 'var(--muted)' }}>No YouTube channels yet.</p>
             )}
             {youtube.map((ch) => (
-              <div key={ch.id} style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+              <div key={ch.id} style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
                 {editingYt?.id === ch.id ? (
                   <form onSubmit={saveYt} style={{ padding: '14px 16px', display: 'grid', gap: 8 }}>
                     <input
@@ -724,7 +724,7 @@ export default function AdminPage() {
             {showNewYt ? (
               <form
                 onSubmit={createYt}
-                style={{ border: '1px solid var(--border)', borderRadius: 8, padding: '14px 16px', display: 'grid', gap: 8 }}
+                style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '14px 16px', display: 'grid', gap: 8 }}
               >
                 <p style={{ fontSize: 13, fontWeight: 600, margin: 0 }}>Add YouTube channel</p>
                 <input
@@ -816,7 +816,7 @@ function ControlCard({
   const running = active && ctrlStatus.state === 'running'
 
   return (
-    <div style={{ border: '1px solid var(--border)', borderRadius: 8, padding: '16px' }}>
+    <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '16px' }}>
       <p style={{ fontWeight: 600, fontSize: 14, margin: '0 0 4px' }}>{title}</p>
       <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 14px' }}>{description}</p>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>

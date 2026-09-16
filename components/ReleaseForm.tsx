@@ -10,7 +10,7 @@ const inputStyle: React.CSSProperties = {
   background: 'var(--background)',
   color: 'var(--foreground)',
   border: '1px solid var(--border)',
-  borderRadius: '8px',
+  borderRadius: 'var(--radius)',
   outline: 'none',
   minHeight: '44px',
   colorScheme: 'dark',
@@ -197,7 +197,7 @@ export default function ReleaseForm({ initial, onClose, onSaved, onDeleted }: Pr
                 padding: '8px 12px',
                 fontSize: 13,
                 fontWeight: 500,
-                borderRadius: 8,
+                borderRadius: 'var(--radius)',
                 cursor: 'pointer',
                 minHeight: 36,
                 border: '1px solid var(--border)',
@@ -219,7 +219,7 @@ export default function ReleaseForm({ initial, onClose, onSaved, onDeleted }: Pr
           style={{ ...inputStyle, marginBottom: 16 }}
         />
 
-        <label style={labelStyle}>Link (optional)</label>
+        <label style={labelStyle}>Link</label>
         <input
           type="url"
           value={url}
@@ -228,11 +228,11 @@ export default function ReleaseForm({ initial, onClose, onSaved, onDeleted }: Pr
           style={{ ...inputStyle, marginBottom: 16 }}
         />
 
-        <label style={labelStyle}>Notes (optional)</label>
+        <label style={labelStyle}>Notes</label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Platform, theater, anything to remember"
+          placeholder="Optional"
           style={{ ...inputStyle, minHeight: 88, resize: 'vertical', marginBottom: 20 }}
         />
 
@@ -247,10 +247,10 @@ export default function ReleaseForm({ initial, onClose, onSaved, onDeleted }: Pr
             width: '100%',
             minHeight: 44,
             border: 'none',
-            borderRadius: 8,
+            borderRadius: 'var(--radius)',
             background: 'var(--foreground)',
             color: 'var(--background)',
-            fontSize: 15,
+            fontSize: 16,
             fontWeight: 500,
             cursor: saving ? 'default' : 'pointer',
             opacity: saving ? 0.6 : 1,
@@ -269,10 +269,10 @@ export default function ReleaseForm({ initial, onClose, onSaved, onDeleted }: Pr
               minHeight: 44,
               marginTop: 10,
               border: 'none',
-              borderRadius: 8,
+              borderRadius: 'var(--radius)',
               background: 'transparent',
               color: 'var(--muted)',
-              fontSize: 14,
+              fontSize: 13,
               cursor: saving ? 'default' : 'pointer',
             }}
           >
@@ -286,10 +286,7 @@ export default function ReleaseForm({ initial, onClose, onSaved, onDeleted }: Pr
 
 const labelStyle: React.CSSProperties = {
   display: 'block',
-  fontSize: 12,
-  fontWeight: 600,
-  letterSpacing: '0.06em',
-  textTransform: 'uppercase',
+  fontSize: 13,
   color: 'var(--muted)',
   marginBottom: 8,
 }

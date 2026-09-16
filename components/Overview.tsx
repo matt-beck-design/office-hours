@@ -79,7 +79,7 @@ export default function Overview({ items, videos, releases, onSeeAll }: Props) {
                       <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 6px' }}>
                         {whenLabel(release.release_date, today)}
                       </p>
-                      <p className="font-medium leading-snug" style={{ margin: '0 0 4px', fontSize: 16 }}>
+                      <p className="font-medium leading-snug" style={{ margin: '0 0 4px' }}>
                         {release.title}
                       </p>
                       <p style={{ fontSize: 13, color: 'var(--muted)', margin: 0 }}>
@@ -137,18 +137,7 @@ export default function Overview({ items, videos, releases, onSeeAll }: Props) {
 function SectionHeader({ title, onSeeAll }: { title: string; onSeeAll: () => void }) {
   return (
     <div className="flex items-center justify-between" style={{ padding: '0 4px 8px' }}>
-      <p
-        style={{
-          fontSize: 11,
-          fontWeight: 600,
-          letterSpacing: '0.09em',
-          textTransform: 'uppercase',
-          color: 'var(--muted)',
-          margin: 0,
-        }}
-      >
-        {title}
-      </p>
+      <p style={{ fontSize: 13, color: 'var(--muted)', margin: 0 }}>{title}</p>
       <button
         type="button"
         onClick={onSeeAll}
