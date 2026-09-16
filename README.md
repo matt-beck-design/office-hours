@@ -87,7 +87,7 @@ Push notifications require the app to be installed to the home screen on iOS.
 ## How it works
 
 - Sources are organized into **topic groups** in admin (for managing feeds)
-- The home screen groups content by **type**: Articles (RSS), Posts (Bluesky), Videos (YouTube), plus a **Releases** feed
+- The home screen opens on **Overview**, then type tabs: Articles, Posts, Videos, Releases
 - A daily cron (or admin "Refresh feeds") fetches RSS + Bluesky into `feed_items` and YouTube into `videos`
 - Articles open in the in-app reader; posts and videos open externally
 - Track games, movies, shows, and other drop dates on the Releases tab (add/edit requires the admin password)
@@ -105,13 +105,14 @@ lib/
   fetch-feeds.ts            — RSS + Bluesky + YouTube fetchers
   get-sources.ts            — load sources from DB (fallback: config)
 app/
-  page.tsx                  — Articles / Posts / Videos / Releases
+  page.tsx                  — Overview + type tabs
   admin/                    — source management + refresh controls
   api/items/                — serve feed items
   api/videos/               — serve videos
   api/releases/             — release feed CRUD
   api/cron/daily/           — daily ingest cron
 components/
+  Overview.tsx              — all-types dashboard
   ContentStream.tsx         — content-type streams
   ReleaseCalendar.tsx       — upcoming release feed
   ReaderSheet.tsx           — in-app article reader
