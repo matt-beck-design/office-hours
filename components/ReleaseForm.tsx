@@ -5,12 +5,13 @@ import { Release, RELEASE_KINDS, ReleaseKind, kindLabel, isReleaseKind } from '@
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
-  padding: '10px 12px',
+  padding: '12px 0',
   fontSize: '16px',
-  background: 'var(--background)',
+  background: 'transparent',
   color: 'var(--foreground)',
-  border: '1px solid var(--border)',
-  borderRadius: '8px',
+  border: 'none',
+  borderBottom: '1px solid var(--border)',
+  borderRadius: 0,
   outline: 'none',
   minHeight: '44px',
   colorScheme: 'dark',
@@ -150,7 +151,7 @@ export default function ReleaseForm({ initial, onClose, onSaved, onDeleted }: Pr
         >
           Cancel
         </button>
-        <p className="text-sm font-medium" style={{ margin: 0 }}>
+        <p style={{ margin: 0 }}>
           {editing ? 'Edit release' : 'Add release'}
         </p>
         <span style={{ width: 52 }} />
@@ -187,22 +188,18 @@ export default function ReleaseForm({ initial, onClose, onSaved, onDeleted }: Pr
         />
 
         <label style={labelStyle}>Type</label>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, marginBottom: 24 }}>
           {RELEASE_KINDS.map((k) => (
             <button
               key={k}
               type="button"
               onClick={() => setKind(k)}
               style={{
-                padding: '8px 12px',
-                fontSize: 13,
-                fontWeight: 500,
-                borderRadius: 8,
+                background: 'none',
+                border: 'none',
+                padding: 0,
                 cursor: 'pointer',
-                minHeight: 36,
-                border: '1px solid var(--border)',
-                background: kind === k ? 'var(--foreground)' : 'transparent',
-                color: kind === k ? 'var(--background)' : 'var(--foreground)',
+                color: kind === k ? 'var(--foreground)' : 'var(--muted)',
               }}
             >
               {kindLabel(k)}
@@ -216,44 +213,40 @@ export default function ReleaseForm({ initial, onClose, onSaved, onDeleted }: Pr
           value={date}
           onChange={(e) => setDate(e.target.value)}
           required
-          style={{ ...inputStyle, marginBottom: 16 }}
+          style={{ ...inputStyle, marginBottom: 24 }}
         />
 
-        <label style={labelStyle}>Link (optional)</label>
+        <label style={labelStyle}>Link</label>
         <input
           type="url"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="https://"
-          style={{ ...inputStyle, marginBottom: 16 }}
+          style={{ ...inputStyle, marginBottom: 24 }}
         />
 
-        <label style={labelStyle}>Notes (optional)</label>
+        <label style={labelStyle}>Notes</label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Platform, theater, anything to remember"
-          style={{ ...inputStyle, minHeight: 88, resize: 'vertical', marginBottom: 20 }}
+          placeholder="Optional"
+          style={{ ...inputStyle, minHeight: 88, resize: 'vertical', marginBottom: 40 }}
         />
 
         {error && (
-          <p style={{ fontSize: 13, color: '#c00', margin: '0 0 12px' }}>{error}</p>
+          <p style={{ color: '#c00', margin: '0 0 16px' }}>{error}</p>
         )}
 
         <button
           type="submit"
           disabled={saving || !title.trim() || !date}
           style={{
-            width: '100%',
-            minHeight: 44,
+            background: 'none',
             border: 'none',
-            borderRadius: 8,
-            background: 'var(--foreground)',
-            color: 'var(--background)',
-            fontSize: 15,
-            fontWeight: 500,
+            padding: 0,
+            color: 'var(--foreground)',
             cursor: saving ? 'default' : 'pointer',
-            opacity: saving ? 0.6 : 1,
+            opacity: saving ? 0.5 : 1,
           }}
         >
           {saving ? 'Saving…' : editing ? 'Save' : 'Add release'}
@@ -265,14 +258,12 @@ export default function ReleaseForm({ initial, onClose, onSaved, onDeleted }: Pr
             onClick={remove}
             disabled={saving}
             style={{
-              width: '100%',
-              minHeight: 44,
-              marginTop: 10,
+              display: 'block',
+              marginTop: 24,
+              background: 'none',
               border: 'none',
-              borderRadius: 8,
-              background: 'transparent',
+              padding: 0,
               color: 'var(--muted)',
-              fontSize: 14,
               cursor: saving ? 'default' : 'pointer',
             }}
           >
@@ -286,10 +277,6 @@ export default function ReleaseForm({ initial, onClose, onSaved, onDeleted }: Pr
 
 const labelStyle: React.CSSProperties = {
   display: 'block',
-  fontSize: 12,
-  fontWeight: 600,
-  letterSpacing: '0.06em',
-  textTransform: 'uppercase',
   color: 'var(--muted)',
   marginBottom: 8,
 }

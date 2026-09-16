@@ -52,12 +52,12 @@ export function whenLabel(dateStr: string, today: string): string {
   const date = new Date(dateStr + 'T12:00:00')
   const weekday = date.toLocaleDateString('en-US', { weekday: 'short' })
   const formatted = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-  const stamp = `${weekday}, ${formatted}`
+  const stamp = `${weekday} ${formatted}`
 
-  if (dateStr === today) return `Today · ${stamp}`
-  if (dateStr === addDays(today, 1)) return `Tomorrow · ${stamp}`
+  if (dateStr === today) return `Today ${stamp}`
+  if (dateStr === addDays(today, 1)) return `Tomorrow ${stamp}`
 
   const diff = Math.round((date.getTime() - new Date(today + 'T12:00:00').getTime()) / 86400000)
-  if (diff > 0 && diff < 14) return `In ${diff} days · ${stamp}`
+  if (diff > 0 && diff < 14) return `In ${diff} days ${stamp}`
   return stamp
 }

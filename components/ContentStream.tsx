@@ -32,9 +32,9 @@ export default function ContentStream({ tab, items, videos }: Props) {
     return (
       <div
         className="mx-auto pb-[env(safe-area-inset-bottom)]"
-        style={{ maxWidth: '576px', paddingTop: '16px', paddingLeft: '16px', paddingRight: '16px' }}
+        style={{ maxWidth: 'var(--column)', padding: '32px 24px 48px' }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
           {list.map((video) => (
             <VideoCard key={video.id} video={video} />
           ))}
@@ -59,8 +59,11 @@ export default function ContentStream({ tab, items, videos }: Props) {
         />
       )}
 
-      <div className="mx-auto pb-[env(safe-area-inset-bottom)]" style={{ maxWidth: '576px', paddingTop: '24px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      <div
+        className="mx-auto pb-[env(safe-area-inset-bottom)]"
+        style={{ maxWidth: 'var(--column)', padding: '32px 24px 48px' }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {filtered.map((item) =>
             tab === 'posts' ? (
               <PostCard key={item.id} item={item} />
@@ -80,8 +83,8 @@ export default function ContentStream({ tab, items, videos }: Props) {
 
 function EmptyState({ label }: { label: string }) {
   return (
-    <div className="px-5 py-12 mx-auto text-center" style={{ maxWidth: '576px' }}>
-      <p className="text-sm" style={{ color: 'var(--muted)' }}>
+    <div className="px-6 py-16 mx-auto text-left" style={{ maxWidth: 'var(--column)' }}>
+      <p style={{ color: 'var(--muted)', margin: 0 }}>
         No {label} yet. Run a feed refresh from admin to pull content.
       </p>
     </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import ReleaseForm from './ReleaseForm'
 import {
   Release,
@@ -51,12 +51,12 @@ export default function ReleaseCalendar() {
 
   if (loading) {
     return (
-      <div className="px-5 py-8 mx-auto" style={{ maxWidth: '576px' }}>
+      <div className="px-5 py-8 mx-auto" style={{ maxWidth: 'var(--column)' }}>
         <div className="space-y-3">
           {[...Array(6)].map((_, i) => (
             <div
               key={i}
-              className="h-4 rounded animate-pulse"
+              className="h-4 animate-pulse"
               style={{ background: 'var(--border)', width: `${60 + (i % 3) * 15}%` }}
             />
           ))}
@@ -78,76 +78,53 @@ export default function ReleaseCalendar() {
 
       <div
         className="mx-auto pb-[env(safe-area-inset-bottom)]"
-        style={{ maxWidth: '576px', padding: '20px 16px 32px' }}
+        style={{ maxWidth: 'var(--column)', padding: '32px 24px 48px' }}
       >
-        <div className="flex items-center justify-between mb-5">
-          <h1 className="text-base font-medium" style={{ margin: 0 }}>
-            Coming up
-          </h1>
-          <button type="button" onClick={() => setForm({ release_date: today })} style={addBtn}>
+        <div className="flex items-center justify-between mb-8" style={{ gap: 24 }}>
+          <div className="flex gap-6 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+            <TextFilter active={filter === 'all'} onClick={() => setFilter('all')} label="All" />
+            {RELEASE_KINDS.map((k) => (
+              <TextFilter
+                key={k}
+                active={filter === k}
+                onClick={() => setFilter(k)}
+                label={kindLabel(k)}
+              />
+            ))}
+          </div>
+          <button type="button" onClick={() => setForm({ release_date: today })} style={textAction}>
             Add
           </button>
         </div>
 
-        <div className="flex gap-2 overflow-x-auto mb-6" style={{ scrollbarWidth: 'none' }}>
-          <FilterChip active={filter === 'all'} onClick={() => setFilter('all')} label="All" />
-          {RELEASE_KINDS.map((k) => (
-            <FilterChip
-              key={k}
-              active={filter === k}
-              onClick={() => setFilter(k)}
-              label={kindLabel(k)}
-            />
-          ))}
-        </div>
-
         {upcoming.length === 0 ? (
-          <p className="text-sm" style={{ color: 'var(--muted)', margin: '0 0 24px', padding: '0 4px' }}>
+          <p style={{ color: 'var(--muted)', margin: '0 0 32px' }}>
             Nothing coming up. Add a release to start tracking.
           </p>
         ) : (
-          <MonthSections groups={groupByMonth(upcoming)} today={today} onOpen={setForm} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {upcoming.map((r) => (
+              <ReleaseRow key={r.id} release={r} today={today} onOpen={() => setForm(r)} />
+            ))}
+          </div>
         )}
 
         {past.length > 0 && (
-          <div style={{ marginTop: 32 }}>
-            <button type="button" onClick={() => setShowPast((v) => !v)} style={ghostBtn}>
-              {showPast ? 'Hide past releases' : `Show past releases (${past.length})`}
+          <div style={{ marginTop: 64 }}>
+            <button type="button" onClick={() => setShowPast((v) => !v)} style={textAction}>
+              {showPast ? 'Hide past' : `Past (${past.length})`}
             </button>
             {showPast && (
-              <div style={{ marginTop: 12 }}>
-                <MonthSections groups={groupByMonth(past)} today={today} onOpen={setForm} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 24 }}>
+                {past.map((r) => (
+                  <ReleaseRow key={r.id} release={r} today={today} onOpen={() => setForm(r)} />
+                ))}
               </div>
             )}
           </div>
         )}
       </div>
     </>
-  )
-}
-
-function MonthSections({
-  groups,
-  today,
-  onOpen,
-}: {
-  groups: { key: string; label: string; items: Release[] }[]
-  today: string
-  onOpen: (release: Release) => void
-}) {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
-      {groups.map((group) => (
-        <section key={group.key}>
-          <SectionLabel>{group.label}</SectionLabel>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            {group.items.map((r) => (
-              <ReleaseRow key={r.id} release={r} today={today} onOpen={() => onOpen(r)} />
-            ))}
-          </div>
-        </section>
-      ))}
-    </div>
   )
 }
 
@@ -162,26 +139,19 @@ function ReleaseRow({
 }) {
   return (
     <button type="button" onClick={onOpen} className="digest-item w-full text-left">
-      <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 6px' }}>
+      <p style={{ color: 'var(--muted)', margin: '0 0 8px' }}>
         {whenLabel(release.release_date, today)}
       </p>
-      <p className="font-medium leading-snug" style={{ margin: '0 0 4px', fontSize: 17 }}>
-        {release.title}
-      </p>
-      <p style={{ fontSize: 13, color: 'var(--muted)', margin: 0 }}>
+      <p style={{ color: 'var(--foreground)', margin: '0 0 8px' }}>{release.title}</p>
+      <p style={{ color: 'var(--muted)', margin: 0 }}>
         {kindLabel(release.kind)}
-        {release.notes && (
-          <>
-            <span style={{ margin: '0 6px', opacity: 0.5 }}>·</span>
-            {release.notes}
-          </>
-        )}
+        {release.notes ? ` ${release.notes}` : ''}
       </p>
     </button>
   )
 }
 
-function FilterChip({
+function TextFilter({
   active,
   onClick,
   label,
@@ -196,14 +166,11 @@ function FilterChip({
       onClick={onClick}
       style={{
         flexShrink: 0,
-        padding: '6px 12px',
-        fontSize: 13,
-        fontWeight: 500,
-        borderRadius: 8,
+        background: 'none',
+        border: 'none',
+        padding: 0,
         cursor: 'pointer',
-        border: '1px solid var(--border)',
-        background: active ? 'var(--foreground)' : 'transparent',
-        color: active ? 'var(--background)' : 'var(--muted)',
+        color: active ? 'var(--foreground)' : 'var(--muted)',
       }}
     >
       {label}
@@ -211,63 +178,11 @@ function FilterChip({
   )
 }
 
-function SectionLabel({ children }: { children: ReactNode }) {
-  return (
-    <p
-      style={{
-        fontSize: 11,
-        fontWeight: 600,
-        letterSpacing: '0.09em',
-        textTransform: 'uppercase',
-        color: 'var(--muted)',
-        margin: '0 0 4px',
-        padding: '0 12px',
-      }}
-    >
-      {children}
-    </p>
-  )
-}
-
-function groupByMonth(items: Release[]): { key: string; label: string; items: Release[] }[] {
-  const groups: { key: string; label: string; items: Release[] }[] = []
-  for (const item of items) {
-    const key = item.release_date.slice(0, 7)
-    const last = groups[groups.length - 1]
-    if (last?.key === key) {
-      last.items.push(item)
-      continue
-    }
-    groups.push({
-      key,
-      label: new Date(item.release_date + 'T12:00:00').toLocaleDateString('en-US', {
-        month: 'long',
-        year: 'numeric',
-      }),
-      items: [item],
-    })
-  }
-  return groups
-}
-
-const addBtn: React.CSSProperties = {
-  background: 'var(--foreground)',
-  color: 'var(--background)',
-  border: 'none',
-  borderRadius: 8,
-  padding: '8px 14px',
-  fontSize: 13,
-  fontWeight: 500,
-  cursor: 'pointer',
-  minHeight: 36,
-}
-
-const ghostBtn: React.CSSProperties = {
+const textAction: React.CSSProperties = {
   background: 'none',
   border: 'none',
   color: 'var(--muted)',
-  fontSize: 13,
-  fontWeight: 500,
   cursor: 'pointer',
-  padding: '8px 4px',
+  padding: 0,
+  flexShrink: 0,
 }

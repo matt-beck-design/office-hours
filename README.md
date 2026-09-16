@@ -2,6 +2,8 @@
 
 A personal content dashboard PWA. Pulls RSS, Bluesky, and YouTube into live topic streams you can browse and read in-app. Lives on your iPhone home screen.
 
+Design rules live in [`design.md`](design.md).
+
 ## Stack
 
 - Next.js 16 App Router + TypeScript
