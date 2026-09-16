@@ -9,6 +9,7 @@ export interface FeedItem {
   summary: string
   published: string // ISO string
   source: string    // source name
+  sourceType: 'rss' | 'bluesky'
 }
 
 // ── RSS ──────────────────────────────────────────────────────────────────────
@@ -23,6 +24,7 @@ export async function fetchRss(name: string, url: string): Promise<FeedItem[]> {
       summary: stripHtml(item.contentSnippet ?? item.content ?? '').slice(0, 400),
       published: item.isoDate ?? item.pubDate ?? new Date().toISOString(),
       source: name,
+      sourceType: 'rss' as const,
     }))
   } catch {
     return []
@@ -51,6 +53,7 @@ export async function fetchBluesky(name: string, handle: string): Promise<FeedIt
         summary: text.slice(0, 400),
         published: post.indexedAt ?? new Date().toISOString(),
         source: name,
+        sourceType: 'bluesky' as const,
       }
     })
   } catch {

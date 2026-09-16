@@ -4,11 +4,14 @@ import { useState } from 'react'
 import Image from 'next/image'
 import ReaderSheet from './ReaderSheet'
 
+export type ContentTab = 'articles' | 'posts' | 'videos'
+
 export interface FeedItemRow {
   id: string
   external_id: string
   group_id: string
   source_name: string
+  source_type?: 'rss' | 'bluesky' | null
   title: string
   url: string
   summary: string | null
@@ -27,43 +30,38 @@ export interface Video {
 }
 
 interface Props {
-  groupName: string
-  groupId: string
+  tab: ContentTab
   items: FeedItemRow[]
   videos: Video[]
 }
 
-type ListItem =
-  | { kind: 'article'; item: FeedItemRow; at: number }
-  | { kind: 'video'; video: Video; at: number }
-
-export default function GroupView({ groupName, groupId, items, videos }: Props) {
+export default function ContentStream({ tab, items, videos }: Props) {
   const [reader, setReader] = useState<{ url: string; title: string } | null>(null)
 
-  const groupItems = items.filter((i) => i.group_id === groupId)
-  const groupVideos = videos.filter((v) => v.group_id === groupId)
-
-  const listItems: ListItem[] = [
-    ...groupItems.map((item): ListItem => ({
-      kind: 'article',
-      item,
-      at: new Date(item.published_at).getTime(),
-    })),
-    ...groupVideos.map((video): ListItem => ({
-      kind: 'video',
-      video,
-      at: new Date(video.published_at).getTime(),
-    })),
-  ].sort((a, b) => b.at - a.at)
-
-  if (listItems.length === 0) {
+  if (tab === 'videos') {
+    const list = [...videos].sort(
+      (a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime(),
+    )
+    if (list.length === 0) {
+      return <EmptyState label="videos" />
+    }
     return (
-      <div className="px-5 py-12 mx-auto text-center" style={{ maxWidth: '576px' }}>
-        <p className="text-sm" style={{ color: 'var(--muted)' }}>
-          Nothing in {groupName} yet. Run a feed refresh from admin to pull content.
-        </p>
+      <div className="mx-auto pb-[env(safe-area-inset-bottom)]" style={{ maxWidth: '576px', paddingTop: '24px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          {list.map((video) => (
+            <VideoCard key={video.id} video={video} />
+          ))}
+        </div>
       </div>
     )
+  }
+
+  const filtered = items
+    .filter((item) => (tab === 'posts' ? isPost(item) : isArticle(item)))
+    .sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime())
+
+  if (filtered.length === 0) {
+    return <EmptyState label={tab} />
   }
 
   return (
@@ -78,23 +76,42 @@ export default function GroupView({ groupName, groupId, items, videos }: Props) 
 
       <div className="mx-auto pb-[env(safe-area-inset-bottom)]" style={{ maxWidth: '576px', paddingTop: '24px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          {listItems.map((entry) =>
-            entry.kind === 'article' ? (
+          {filtered.map((item) =>
+            tab === 'posts' ? (
+              <PostCard key={item.id} item={item} />
+            ) : (
               <ArticleCard
-                key={entry.item.id}
-                item={entry.item}
+                key={item.id}
+                item={item}
                 onOpen={() =>
-                  entry.item.url &&
-                  setReader({ url: entry.item.url, title: entry.item.title })
+                  item.url && setReader({ url: item.url, title: item.title })
                 }
               />
-            ) : (
-              <VideoCard key={entry.video.id} video={entry.video} />
             ),
           )}
         </div>
       </div>
     </>
+  )
+}
+
+function isPost(item: FeedItemRow): boolean {
+  if (item.source_type === 'bluesky') return true
+  if (item.source_type === 'rss') return false
+  return item.url.includes('bsky.app')
+}
+
+function isArticle(item: FeedItemRow): boolean {
+  return !isPost(item)
+}
+
+function EmptyState({ label }: { label: string }) {
+  return (
+    <div className="px-5 py-12 mx-auto text-center" style={{ maxWidth: '576px' }}>
+      <p className="text-sm" style={{ color: 'var(--muted)' }}>
+        No {label} yet. Run a feed refresh from admin to pull content.
+      </p>
+    </div>
   )
 }
 
@@ -121,6 +138,35 @@ function ArticleCard({ item, onOpen }: { item: FeedItemRow; onOpen: () => void }
         {relativeDate(item.published_at)}
       </p>
     </button>
+  )
+}
+
+function PostCard({ item }: { item: FeedItemRow }) {
+  const body = item.summary || item.title
+  return (
+    <a
+      href={item.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block digest-item"
+    >
+      <p
+        style={{
+          color: 'var(--foreground)',
+          margin: '0 0 0.5rem',
+          fontSize: '16px',
+          lineHeight: '24px',
+          whiteSpace: 'pre-wrap',
+        }}
+      >
+        {body}
+      </p>
+      <p style={{ fontSize: '13px', color: 'var(--muted)', margin: 0 }}>
+        {item.source_name}
+        <span style={{ margin: '0 6px', opacity: 0.5 }}>·</span>
+        {relativeDate(item.published_at)}
+      </p>
+    </a>
   )
 }
 
