@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { runDailyDigest } from '@/lib/run-daily'
+import { runIngest } from '@/lib/run-ingest'
 
 export const runtime = 'nodejs'
 export const maxDuration = 300
@@ -16,7 +16,7 @@ function authGuard(req: Request) {
 export async function GET(req: Request) {
   const guard = authGuard(req)
   if (guard) return guard
-  const result = await runDailyDigest()
+  const result = await runIngest()
   return NextResponse.json({ ok: true, ...result })
 }
 
