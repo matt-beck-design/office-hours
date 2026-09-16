@@ -9,7 +9,7 @@ export async function GET(req: Request) {
   const db = supabaseAdmin()
   let query = db
     .from('feed_items')
-    .select('id, external_id, group_id, source_name, source_type, title, url, summary, published_at')
+    .select('id, external_id, group_id, source_name, source_type, title, url, summary, image_url, published_at')
     .order('published_at', { ascending: false })
     .limit(limit)
 

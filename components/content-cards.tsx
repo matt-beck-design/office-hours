@@ -11,6 +11,7 @@ export interface FeedItemRow {
   title: string
   url: string
   summary: string | null
+  image_url?: string | null
   published_at: string
 }
 
@@ -38,6 +39,12 @@ export function isArticle(item: FeedItemRow): boolean {
 export function ArticleCard({ item, onOpen }: { item: FeedItemRow; onOpen: () => void }) {
   return (
     <button onClick={onOpen} className="block digest-item w-full text-left">
+      {item.image_url && (
+        <div className="article-thumb">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={item.image_url} alt="" loading="lazy" decoding="async" />
+        </div>
+      )}
       <p className="type-title">{item.title}</p>
       {item.summary && <p className="type-body line-clamp-3">{item.summary}</p>}
       <p className="type-meta">
@@ -51,6 +58,12 @@ export function PostCard({ item }: { item: FeedItemRow }) {
   const body = item.summary || item.title
   return (
     <a href={item.url} target="_blank" rel="noopener noreferrer" className="block digest-item">
+      {item.image_url && (
+        <div className="article-thumb">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={item.image_url} alt="" loading="lazy" decoding="async" />
+        </div>
+      )}
       <p
         className="type-body"
         style={{ color: 'var(--foreground)', whiteSpace: 'pre-wrap', margin: 0 }}

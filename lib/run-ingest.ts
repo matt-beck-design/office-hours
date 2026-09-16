@@ -46,6 +46,7 @@ export async function runIngest(): Promise<IngestResult> {
             title: i.title || '(untitled)',
             url: i.url,
             summary: i.summary || null,
+            image_url: i.imageUrl,
             published_at: i.published,
           })),
           { onConflict: 'external_id,source_name' },

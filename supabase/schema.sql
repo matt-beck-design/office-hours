@@ -82,6 +82,7 @@ create table if not exists feed_items (
   title text not null,
   url text not null,
   summary text,
+  image_url text,
   published_at timestamptz not null,
   created_at timestamptz default now(),
   unique (external_id, source_name)
