@@ -1,16 +1,31 @@
 import { NextResponse } from 'next/server'
-import { getLiveVideos, LIVE_REVALIDATE_SECONDS } from '@/lib/live-feeds'
+import { revalidateTag } from 'next/cache'
+import {
+  getLiveVideos,
+  getLiveVideosFresh,
+  LIVE_REVALIDATE_SECONDS,
+} from '@/lib/live-feeds'
 
 export const revalidate = 300
 
-export async function GET() {
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url)
+  const fresh = searchParams.get('fresh') === '1'
+
   try {
-    const videos = (await getLiveVideos()).slice(0, 200)
+    const videos = (
+      fresh ? await getLiveVideosFresh() : await getLiveVideos()
+    ).slice(0, 200)
+
+    if (fresh) revalidateTag('live-feed-videos', { expire: 0 })
+
     return NextResponse.json(
       { videos },
       {
         headers: {
-          'Cache-Control': `public, s-maxage=${LIVE_REVALIDATE_SECONDS}, stale-while-revalidate=${LIVE_REVALIDATE_SECONDS * 2}`,
+          'Cache-Control': fresh
+            ? 'no-store'
+            : `public, s-maxage=${LIVE_REVALIDATE_SECONDS}, stale-while-revalidate=${LIVE_REVALIDATE_SECONDS * 2}`,
         },
       },
     )

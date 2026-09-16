@@ -143,6 +143,24 @@ textarea {
   gap: var(--space-tight);
 }
 
+/* Pull-to-refresh — muted meta only, no spinner chrome */
+.pull-refresh-indicator {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  padding-bottom: 8px;
+  transition: opacity var(--duration-press) var(--ease-out);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pull-refresh-indicator {
+    transition: none;
+  }
+}
+
 /* Content rows — hairline grid, tight related clusters */
 .digest-item,
 .video-item,
