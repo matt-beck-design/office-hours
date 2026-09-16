@@ -41,7 +41,7 @@ export default function Home() {
   }, [])
 
   return (
-    <div className="h-full" style={{ background: 'var(--background)' }}>
+    <div className="h-dvh overflow-hidden" style={{ background: 'var(--background)' }}>
       <aside
         className="hidden md:flex flex-col"
         style={{
@@ -49,7 +49,7 @@ export default function Home() {
           top: 0,
           left: 0,
           width: 200,
-          height: '100vh',
+          height: '100dvh',
           padding: '40px 24px',
           overflowY: 'auto',
           zIndex: 10,
@@ -79,7 +79,7 @@ export default function Home() {
         </div>
       </aside>
 
-      <div className="flex flex-col h-full md:hidden">
+      <div className="flex flex-col h-full min-h-0 md:hidden">
         <header
           className="flex items-center justify-between px-6 pt-[env(safe-area-inset-top)] flex-shrink-0"
           style={{ paddingBottom: 0 }}
@@ -109,10 +109,12 @@ export default function Home() {
             </button>
           ))}
         </nav>
-        <main className="flex-1 overflow-y-auto">{renderContent()}</main>
+        <main className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
+          {renderContent()}
+        </main>
       </div>
 
-      <main className="hidden md:block h-full overflow-y-auto">{renderContent()}</main>
+      <main className="hidden md:block h-full min-h-0 overflow-y-auto">{renderContent()}</main>
     </div>
   )
 
