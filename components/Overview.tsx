@@ -11,7 +11,7 @@ import {
   isArticle,
   isPost,
 } from './content-cards'
-import { Release, kindLabel, todayDateStr, whenLabel } from '@/lib/releases'
+import { Release, todayDateStr, whenLabel } from '@/lib/releases'
 
 type OverviewTab = 'articles' | 'posts' | 'videos' | 'releases'
 
@@ -79,7 +79,6 @@ export default function Overview({ items, videos, releases, onSeeAll }: Props) {
                       <p className="type-title" style={{ marginTop: 'var(--space-tight)' }}>
                         {release.title}
                       </p>
-                      <p className="type-meta">{kindLabel(release.kind)}</p>
                     </button>
                   ))}
                 </div>
