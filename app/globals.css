@@ -14,8 +14,14 @@
   --space-related: 8px;
   --space-row: 20px;
   --space-section: 72px;
-  --gutter: 28px;
+  --gutter: 16px;
   --column: 540px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --gutter: 24px;
+  }
 }
 
 @theme inline {
