@@ -57,18 +57,18 @@ export default function Overview({ items, videos, releases, onSeeAll }: Props) {
 
       <div
         className="mx-auto pb-[env(safe-area-inset-bottom)]"
-        style={{ maxWidth: '576px', padding: '20px 16px 32px' }}
+        style={{ maxWidth: 'var(--column)', padding: '32px 24px 48px' }}
       >
         {empty ? (
-          <p className="text-sm" style={{ color: 'var(--muted)', margin: 0 }}>
+          <p style={{ color: 'var(--muted)', margin: 0 }}>
             Nothing here yet. Refresh feeds in admin or add a release.
           </p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 64 }}>
             {upcoming.length > 0 && (
               <section>
                 <SectionHeader title="Coming up" onSeeAll={() => onSeeAll('releases')} />
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {upcoming.map((release) => (
                     <button
                       key={release.id}
@@ -76,15 +76,11 @@ export default function Overview({ items, videos, releases, onSeeAll }: Props) {
                       onClick={() => onSeeAll('releases')}
                       className="digest-item w-full text-left"
                     >
-                      <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 6px' }}>
+                      <p style={{ color: 'var(--muted)', margin: '0 0 8px' }}>
                         {whenLabel(release.release_date, today)}
                       </p>
-                      <p className="font-medium leading-snug" style={{ margin: '0 0 4px' }}>
-                        {release.title}
-                      </p>
-                      <p style={{ fontSize: 13, color: 'var(--muted)', margin: 0 }}>
-                        {kindLabel(release.kind)}
-                      </p>
+                      <p style={{ color: 'var(--foreground)', margin: '0 0 8px' }}>{release.title}</p>
+                      <p style={{ color: 'var(--muted)', margin: 0 }}>{kindLabel(release.kind)}</p>
                     </button>
                   ))}
                 </div>
@@ -94,7 +90,7 @@ export default function Overview({ items, videos, releases, onSeeAll }: Props) {
             {articles.length > 0 && (
               <section>
                 <SectionHeader title="Articles" onSeeAll={() => onSeeAll('articles')} />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {articles.map((item) => (
                     <ArticleCard
                       key={item.id}
@@ -109,7 +105,7 @@ export default function Overview({ items, videos, releases, onSeeAll }: Props) {
             {posts.length > 0 && (
               <section>
                 <SectionHeader title="Posts" onSeeAll={() => onSeeAll('posts')} />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {posts.map((item) => (
                     <PostCard key={item.id} item={item} />
                   ))}
@@ -120,7 +116,7 @@ export default function Overview({ items, videos, releases, onSeeAll }: Props) {
             {latestVideos.length > 0 && (
               <section>
                 <SectionHeader title="Videos" onSeeAll={() => onSeeAll('videos')} />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
                   {latestVideos.map((video) => (
                     <VideoCard key={video.id} video={video} />
                   ))}
@@ -136,8 +132,11 @@ export default function Overview({ items, videos, releases, onSeeAll }: Props) {
 
 function SectionHeader({ title, onSeeAll }: { title: string; onSeeAll: () => void }) {
   return (
-    <div className="flex items-center justify-between" style={{ padding: '0 4px 8px' }}>
-      <p style={{ fontSize: 13, color: 'var(--muted)', margin: 0 }}>{title}</p>
+    <div
+      className="flex items-center justify-between"
+      style={{ marginBottom: 16 }}
+    >
+      <p style={{ color: 'var(--muted)', margin: 0 }}>{title}</p>
       <button
         type="button"
         onClick={onSeeAll}
@@ -145,7 +144,6 @@ function SectionHeader({ title, onSeeAll }: { title: string; onSeeAll: () => voi
           background: 'none',
           border: 'none',
           color: 'var(--muted)',
-          fontSize: 13,
           cursor: 'pointer',
           padding: 0,
         }}

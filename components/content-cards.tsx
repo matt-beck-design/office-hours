@@ -38,18 +38,13 @@ export function isArticle(item: FeedItemRow): boolean {
 export function ArticleCard({ item, onOpen }: { item: FeedItemRow; onOpen: () => void }) {
   return (
     <button onClick={onOpen} className="block digest-item w-full text-left">
-      <p className="font-medium leading-snug" style={{ marginBottom: '0.35rem', color: 'var(--foreground)' }}>
-        {item.title}
-      </p>
+      <p style={{ margin: '0 0 8px', color: 'var(--foreground)' }}>{item.title}</p>
       {item.summary && (
-        <p
-          className="line-clamp-3"
-          style={{ color: 'var(--muted)', margin: '0 0 0.5rem', fontSize: '15px', lineHeight: '22px' }}
-        >
+        <p className="line-clamp-3" style={{ color: 'var(--muted)', margin: '0 0 8px' }}>
           {item.summary}
         </p>
       )}
-      <p style={{ fontSize: '13px', color: 'var(--muted)', margin: 0 }}>
+      <p style={{ color: 'var(--muted)', margin: 0 }}>
         {item.source_name} {relativeDate(item.published_at)}
       </p>
     </button>
@@ -60,17 +55,8 @@ export function PostCard({ item }: { item: FeedItemRow }) {
   const body = item.summary || item.title
   return (
     <a href={item.url} target="_blank" rel="noopener noreferrer" className="block digest-item">
-      <p
-        style={{
-          color: 'var(--foreground)',
-          margin: '0 0 0.5rem',
-          lineHeight: '24px',
-          whiteSpace: 'pre-wrap',
-        }}
-      >
-        {body}
-      </p>
-      <p style={{ fontSize: '13px', color: 'var(--muted)', margin: 0 }}>
+      <p style={{ color: 'var(--foreground)', margin: '0 0 8px', whiteSpace: 'pre-wrap' }}>{body}</p>
+      <p style={{ color: 'var(--muted)', margin: 0 }}>
         {item.source_name} {relativeDate(item.published_at)}
       </p>
     </a>
@@ -92,10 +78,10 @@ export function VideoCard({ video }: { video: Video }) {
         </div>
       )}
       <div className="video-meta">
-        <p className="font-medium leading-snug line-clamp-2" style={{ color: 'var(--foreground)', marginBottom: '0.35rem' }}>
+        <p className="line-clamp-2" style={{ color: 'var(--foreground)', margin: '0 0 8px' }}>
           {video.title}
         </p>
-        <p style={{ fontSize: '13px', color: 'var(--muted)', margin: 0 }}>
+        <p style={{ color: 'var(--muted)', margin: 0 }}>
           {video.channel_name} {relativeDate(video.published_at)}
         </p>
       </div>

@@ -74,12 +74,12 @@ export default function PushManager() {
   return (
     <button
       onClick={state === 'subscribed' ? unsubscribe : subscribe}
-      className="text-xs py-1 px-2 rounded transition-colors"
       style={{
         color: 'var(--muted)',
-        background: 'transparent',
-        border: '1px solid var(--border)',
+        background: 'none',
+        border: 'none',
         cursor: 'pointer',
+        padding: 0,
       }}
     >
       {state === 'subscribed' ? 'Notifications on' : 'Enable notifications'}

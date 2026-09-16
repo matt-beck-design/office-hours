@@ -110,7 +110,7 @@ export default function ReaderSheet({ url, fallbackTitle, onClose }: Props) {
               <div
                 key={i}
                 className="animate-pulse"
-                style={{ height: '16px', borderRadius: 'var(--radius)', background: 'var(--border)', width: `${w}%` }}
+                style={{ height: '16px', background: 'var(--border)', width: `${w}%` }}
               />
             ))}
           </div>
@@ -139,15 +139,15 @@ export default function ReaderSheet({ url, fallbackTitle, onClose }: Props) {
         {article && (
           <>
             {article.siteName && (
-              <p style={{ color: 'var(--muted)', fontSize: '13px', marginBottom: '12px' }}>
+              <p style={{ color: 'var(--muted)', marginBottom: '12px' }}>
                 {article.siteName}
               </p>
             )}
-            <h1 style={{ color: 'var(--foreground)', fontSize: '16px', lineHeight: '24px', fontWeight: 500, marginBottom: '12px' }}>
+            <h1 style={{ color: 'var(--foreground)', fontWeight: 400, marginBottom: '12px' }}>
               {article.title}
             </h1>
             {article.byline && (
-              <p style={{ color: 'var(--muted)', fontSize: '13px', marginBottom: '28px' }}>
+              <p style={{ color: 'var(--muted)', marginBottom: '28px' }}>
                 {article.byline}
               </p>
             )}

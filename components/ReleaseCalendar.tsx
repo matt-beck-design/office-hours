@@ -51,12 +51,12 @@ export default function ReleaseCalendar() {
 
   if (loading) {
     return (
-      <div className="px-5 py-8 mx-auto" style={{ maxWidth: '576px' }}>
+      <div className="px-5 py-8 mx-auto" style={{ maxWidth: 'var(--column)' }}>
         <div className="space-y-3">
           {[...Array(6)].map((_, i) => (
             <div
               key={i}
-              className="h-4 rounded-full animate-pulse"
+              className="h-4 animate-pulse"
               style={{ background: 'var(--border)', width: `${60 + (i % 3) * 15}%` }}
             />
           ))}
@@ -78,32 +78,31 @@ export default function ReleaseCalendar() {
 
       <div
         className="mx-auto pb-[env(safe-area-inset-bottom)]"
-        style={{ maxWidth: '576px', padding: '20px 16px 32px' }}
+        style={{ maxWidth: 'var(--column)', padding: '32px 24px 48px' }}
       >
-        <div className="flex items-center justify-end mb-5">
-          <button type="button" onClick={() => setForm({ release_date: today })} style={addBtn}>
+        <div className="flex items-center justify-between mb-8" style={{ gap: 24 }}>
+          <div className="flex gap-6 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+            <TextFilter active={filter === 'all'} onClick={() => setFilter('all')} label="All" />
+            {RELEASE_KINDS.map((k) => (
+              <TextFilter
+                key={k}
+                active={filter === k}
+                onClick={() => setFilter(k)}
+                label={kindLabel(k)}
+              />
+            ))}
+          </div>
+          <button type="button" onClick={() => setForm({ release_date: today })} style={textAction}>
             Add
           </button>
         </div>
 
-        <div className="flex gap-2 overflow-x-auto mb-6" style={{ scrollbarWidth: 'none' }}>
-          <FilterChip active={filter === 'all'} onClick={() => setFilter('all')} label="All" />
-          {RELEASE_KINDS.map((k) => (
-            <FilterChip
-              key={k}
-              active={filter === k}
-              onClick={() => setFilter(k)}
-              label={kindLabel(k)}
-            />
-          ))}
-        </div>
-
         {upcoming.length === 0 ? (
-          <p className="text-sm" style={{ color: 'var(--muted)', margin: '0 0 24px', padding: '0 4px' }}>
+          <p style={{ color: 'var(--muted)', margin: '0 0 32px' }}>
             Nothing coming up. Add a release to start tracking.
           </p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {upcoming.map((r) => (
               <ReleaseRow key={r.id} release={r} today={today} onOpen={() => setForm(r)} />
             ))}
@@ -111,12 +110,12 @@ export default function ReleaseCalendar() {
         )}
 
         {past.length > 0 && (
-          <div style={{ marginTop: 32 }}>
-            <button type="button" onClick={() => setShowPast((v) => !v)} style={ghostBtn}>
+          <div style={{ marginTop: 64 }}>
+            <button type="button" onClick={() => setShowPast((v) => !v)} style={textAction}>
               {showPast ? 'Hide past' : `Past (${past.length})`}
             </button>
             {showPast && (
-              <div style={{ display: 'flex', flexDirection: 'column', marginTop: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 24 }}>
                 {past.map((r) => (
                   <ReleaseRow key={r.id} release={r} today={today} onOpen={() => setForm(r)} />
                 ))}
@@ -140,13 +139,11 @@ function ReleaseRow({
 }) {
   return (
     <button type="button" onClick={onOpen} className="digest-item w-full text-left">
-      <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 6px' }}>
+      <p style={{ color: 'var(--muted)', margin: '0 0 8px' }}>
         {whenLabel(release.release_date, today)}
       </p>
-      <p className="font-medium leading-snug" style={{ margin: '0 0 4px' }}>
-        {release.title}
-      </p>
-      <p style={{ fontSize: 13, color: 'var(--muted)', margin: 0 }}>
+      <p style={{ color: 'var(--foreground)', margin: '0 0 8px' }}>{release.title}</p>
+      <p style={{ color: 'var(--muted)', margin: 0 }}>
         {kindLabel(release.kind)}
         {release.notes ? ` ${release.notes}` : ''}
       </p>
@@ -154,7 +151,7 @@ function ReleaseRow({
   )
 }
 
-function FilterChip({
+function TextFilter({
   active,
   onClick,
   label,
@@ -169,14 +166,11 @@ function FilterChip({
       onClick={onClick}
       style={{
         flexShrink: 0,
-        padding: '6px 12px',
-        fontSize: 13,
-        fontWeight: 500,
-        borderRadius: 'var(--radius)',
+        background: 'none',
+        border: 'none',
+        padding: 0,
         cursor: 'pointer',
-        border: '1px solid var(--border)',
-        background: active ? 'var(--foreground)' : 'transparent',
-        color: active ? 'var(--background)' : 'var(--muted)',
+        color: active ? 'var(--foreground)' : 'var(--muted)',
       }}
     >
       {label}
@@ -184,24 +178,11 @@ function FilterChip({
   )
 }
 
-const addBtn: React.CSSProperties = {
-  background: 'var(--foreground)',
-  color: 'var(--background)',
-  border: 'none',
-  borderRadius: 'var(--radius)',
-  padding: '8px 14px',
-  fontSize: 13,
-  fontWeight: 500,
-  cursor: 'pointer',
-  minHeight: 36,
-}
-
-const ghostBtn: React.CSSProperties = {
+const textAction: React.CSSProperties = {
   background: 'none',
   border: 'none',
   color: 'var(--muted)',
-  fontSize: 13,
-  fontWeight: 500,
   cursor: 'pointer',
-  padding: '8px 4px',
+  padding: 0,
+  flexShrink: 0,
 }
