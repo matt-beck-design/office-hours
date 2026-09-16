@@ -56,14 +56,13 @@ export default function ReaderSheet({ url, fallbackTitle, onClose }: Props) {
         WebkitOverflowScrolling: 'touch',
       }}
     >
-      {/* Header */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '16px 20px',
-          paddingTop: 'max(16px, env(safe-area-inset-top))',
+          padding: '20px var(--gutter)',
+          paddingTop: 'max(20px, env(safe-area-inset-top))',
           borderBottom: '1px solid var(--border)',
           flexShrink: 0,
           position: 'sticky',
@@ -74,88 +73,86 @@ export default function ReaderSheet({ url, fallbackTitle, onClose }: Props) {
       >
         <button
           onClick={onClose}
+          className="type-nav"
           style={{
             background: 'none',
             border: 'none',
             color: 'var(--foreground)',
-            fontSize: '17px',
             cursor: 'pointer',
-            padding: '4px 0',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
+            padding: 0,
           }}
         >
-          ← Back
+          Back
         </button>
         <a
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          style={{
-            color: 'var(--muted)',
-            fontSize: '13px',
-            textDecoration: 'none',
-          }}
+          className="type-meta"
+          style={{ textDecoration: 'none' }}
         >
-          Open ↗
+          Open
         </a>
       </div>
 
-      {/* Content */}
-      <div style={{ maxWidth: '576px', margin: '0 auto', width: '100%', padding: '32px 20px 64px' }}>
+      <div
+        style={{
+          maxWidth: 'var(--column)',
+          margin: '0 auto',
+          width: '100%',
+          padding: '48px var(--gutter) calc(64px + env(safe-area-inset-bottom, 0px))',
+        }}
+      >
         {!article && !error && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div className="cluster" style={{ gap: 12 }}>
             {[100, 70, 85, 60, 90, 75].map((w, i) => (
               <div
                 key={i}
                 className="animate-pulse"
-                style={{ height: '16px', background: 'var(--border)', width: `${w}%` }}
+                style={{ height: 14, background: 'var(--border)', width: `${w}%` }}
               />
             ))}
           </div>
         )}
 
         {error && (
-          <div style={{ paddingTop: '48px' }}>
-            <p style={{ color: 'var(--muted)', fontSize: '15px', marginBottom: '20px' }}>
+          <div style={{ paddingTop: 48 }}>
+            <p className="type-body" style={{ margin: '0 0 20px' }}>
               {error.error === 'blocked'
                 ? 'This site requires a real browser — it blocks server-side readers.'
                 : error.error === 'parse_failed'
-                ? 'Article content couldn\'t be extracted from this page.'
-                : 'Couldn\'t load this article.'}
+                  ? "Article content couldn't be extracted from this page."
+                  : "Couldn't load this article."}
             </p>
             <a
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: 'var(--foreground)', fontSize: '15px' }}
+              className="type-nav"
+              style={{ color: 'var(--foreground)' }}
             >
-              Open in browser ↗
+              Open in browser
             </a>
           </div>
         )}
 
         {article && (
-          <>
-            {article.siteName && (
-              <p style={{ color: 'var(--muted)', marginBottom: '12px' }}>
-                {article.siteName}
-              </p>
-            )}
-            <h1 style={{ color: 'var(--foreground)', fontWeight: 400, marginBottom: '12px' }}>
-              {article.title}
+          <div className="cluster" style={{ gap: 'var(--space-tight)' }}>
+            {article.siteName && <p className="type-meta" style={{ margin: 0 }}>{article.siteName}</p>}
+            <h1 className="type-title" style={{ margin: 0, fontSize: 28, lineHeight: 1.2 }}>
+              {article.title || fallbackTitle}
             </h1>
             {article.byline && (
-              <p style={{ color: 'var(--muted)', marginBottom: '28px' }}>
+              <p className="type-meta" style={{ margin: '4px 0 0' }}>
                 {article.byline}
               </p>
             )}
             <div
               className="reader-content"
+              style={{ marginTop: 36 }}
               dangerouslySetInnerHTML={{ __html: article.content }}
             />
-          </>
+          </div>
         )}
       </div>
     </div>

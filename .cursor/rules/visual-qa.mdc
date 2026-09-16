@@ -1,0 +1,12 @@
+---
+description: User owns visual QA — no screenshots or screen recordings
+alwaysApply: true
+---
+
+# Visual QA
+
+The user handles all visual QA. Do not take screenshots, screen recordings, or run browser/computer-use verification for UI appearance.
+
+- After UI work: build/typecheck if needed, commit, push, update the PR, then stop.
+- Do not use RecordScreen, computerUse, or walkthrough screenshot/video artifacts unless the user explicitly asks in that turn.
+- Prefer shipping the change over proving it visually.

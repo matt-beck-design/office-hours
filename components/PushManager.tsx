@@ -74,8 +74,8 @@ export default function PushManager() {
   return (
     <button
       onClick={state === 'subscribed' ? unsubscribe : subscribe}
+      className="type-meta"
       style={{
-        color: 'var(--muted)',
         background: 'none',
         border: 'none',
         cursor: 'pointer',

@@ -38,13 +38,9 @@ export function isArticle(item: FeedItemRow): boolean {
 export function ArticleCard({ item, onOpen }: { item: FeedItemRow; onOpen: () => void }) {
   return (
     <button onClick={onOpen} className="block digest-item w-full text-left">
-      <p style={{ margin: '0 0 8px', color: 'var(--foreground)' }}>{item.title}</p>
-      {item.summary && (
-        <p className="line-clamp-3" style={{ color: 'var(--muted)', margin: '0 0 8px' }}>
-          {item.summary}
-        </p>
-      )}
-      <p style={{ color: 'var(--muted)', margin: 0 }}>
+      <p className="type-title">{item.title}</p>
+      {item.summary && <p className="type-body line-clamp-3">{item.summary}</p>}
+      <p className="type-meta">
         {item.source_name} {relativeDate(item.published_at)}
       </p>
     </button>
@@ -55,8 +51,10 @@ export function PostCard({ item }: { item: FeedItemRow }) {
   const body = item.summary || item.title
   return (
     <a href={item.url} target="_blank" rel="noopener noreferrer" className="block digest-item">
-      <p style={{ color: 'var(--foreground)', margin: '0 0 8px', whiteSpace: 'pre-wrap' }}>{body}</p>
-      <p style={{ color: 'var(--muted)', margin: 0 }}>
+      <p className="type-title" style={{ whiteSpace: 'pre-wrap', fontSize: 18, lineHeight: 1.4 }}>
+        {body}
+      </p>
+      <p className="type-meta">
         {item.source_name} {relativeDate(item.published_at)}
       </p>
     </a>
@@ -72,16 +70,14 @@ export function VideoCard({ video }: { video: Video }) {
             src={video.thumbnail_url}
             alt={video.title}
             fill
-            sizes="(max-width: 576px) 100vw, 576px"
+            sizes="(max-width: 540px) 100vw, 540px"
             className="object-cover"
           />
         </div>
       )}
-      <div className="video-meta">
-        <p className="line-clamp-2" style={{ color: 'var(--foreground)', margin: '0 0 8px' }}>
-          {video.title}
-        </p>
-        <p style={{ color: 'var(--muted)', margin: 0 }}>
+      <div className="video-meta cluster">
+        <p className="type-title line-clamp-2">{video.title}</p>
+        <p className="type-meta">
           {video.channel_name} {relativeDate(video.published_at)}
         </p>
       </div>

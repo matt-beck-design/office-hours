@@ -51,8 +51,8 @@ export default function ReleaseCalendar() {
 
   if (loading) {
     return (
-      <div className="px-5 py-8 mx-auto" style={{ maxWidth: 'var(--column)' }}>
-        <div className="space-y-3">
+      <div className="page-column">
+        <div className="cluster" style={{ gap: 16 }}>
           {[...Array(6)].map((_, i) => (
             <div
               key={i}
@@ -76,15 +76,12 @@ export default function ReleaseCalendar() {
         />
       )}
 
-      <div
-        className="mx-auto"
-        style={{
-          maxWidth: 'var(--column)',
-          padding: '32px 24px calc(48px + env(safe-area-inset-bottom, 0px))',
-        }}
-      >
-        <div className="flex items-center justify-between mb-8" style={{ gap: 24 }}>
-          <div className="flex gap-6 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+      <div className="page-column">
+        <div
+          className="flex items-baseline justify-between"
+          style={{ gap: 24, marginBottom: 40 }}
+        >
+          <div className="flex overflow-x-auto" style={{ gap: 28, scrollbarWidth: 'none' }}>
             <TextFilter active={filter === 'all'} onClick={() => setFilter('all')} label="All" />
             {RELEASE_KINDS.map((k) => (
               <TextFilter
@@ -101,11 +98,11 @@ export default function ReleaseCalendar() {
         </div>
 
         {upcoming.length === 0 ? (
-          <p style={{ color: 'var(--muted)', margin: '0 0 32px' }}>
+          <p className="type-body" style={{ margin: '0 0 40px' }}>
             Nothing coming up. Add a release to start tracking.
           </p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="row-stack">
             {upcoming.map((r) => (
               <ReleaseRow key={r.id} release={r} today={today} onOpen={() => setForm(r)} />
             ))}
@@ -113,12 +110,12 @@ export default function ReleaseCalendar() {
         )}
 
         {past.length > 0 && (
-          <div style={{ marginTop: 64 }}>
+          <div style={{ marginTop: 'var(--space-section)' }}>
             <button type="button" onClick={() => setShowPast((v) => !v)} style={textAction}>
               {showPast ? 'Hide past' : `Past (${past.length})`}
             </button>
             {showPast && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 24 }}>
+              <div className="row-stack" style={{ marginTop: 28 }}>
                 {past.map((r) => (
                   <ReleaseRow key={r.id} release={r} today={today} onOpen={() => setForm(r)} />
                 ))}
@@ -142,11 +139,13 @@ function ReleaseRow({
 }) {
   return (
     <button type="button" onClick={onOpen} className="digest-item w-full text-left">
-      <p style={{ color: 'var(--muted)', margin: '0 0 8px' }}>
+      <p className="type-meta" style={{ margin: 0 }}>
         {whenLabel(release.release_date, today)}
       </p>
-      <p style={{ color: 'var(--foreground)', margin: '0 0 8px' }}>{release.title}</p>
-      <p style={{ color: 'var(--muted)', margin: 0 }}>
+      <p className="type-title" style={{ marginTop: 'var(--space-tight)' }}>
+        {release.title}
+      </p>
+      <p className="type-meta">
         {kindLabel(release.kind)}
         {release.notes ? ` ${release.notes}` : ''}
       </p>
@@ -167,6 +166,7 @@ function TextFilter({
     <button
       type="button"
       onClick={onClick}
+      className="type-nav"
       style={{
         flexShrink: 0,
         background: 'none',
@@ -188,4 +188,6 @@ const textAction: React.CSSProperties = {
   cursor: 'pointer',
   padding: 0,
   flexShrink: 0,
+  fontSize: 13,
+  lineHeight: 1.4,
 }
